@@ -659,7 +659,7 @@ app.put('/api/employees/:id', requireAuth, async (req, res) => {
     try {
         const updateData = req.body;
         
-        // 먼저 현재 근로자 정보를 조회하여 회사 ID와 입사년도 확인
+        // 먼저 현재 근로자 정보를 조회하여 회사 ID와 원래 입사년도 확인
         const { data: currentEmployee, error: fetchError } = await supabase
             .from('employees')
             .select('company_id, hire_year')
@@ -667,6 +667,8 @@ app.put('/api/employees/:id', requireAuth, async (req, res) => {
             .single();
         
         if (fetchError) throw fetchError;
+        
+        const originalHireYear = currentEmployee.hire_year; // 원래 입사년도 저장
         
         // 한글 키를 영문 DB 컬럼명으로 변환
         const dbData = {
@@ -742,12 +744,12 @@ app.put('/api/employees/:id', requireAuth, async (req, res) => {
                 business_applied_complete: dbData.business_applied_complete
             };
             
-            // 같은 회사, 같은 입사년도(업데이트된 입사년도)의 다른 재직 근로자들 업데이트
+            // 같은 회사, 원래 같은 입사년도였던 다른 재직 근로자들 업데이트
             const { error: syncError } = await supabase
                 .from('employees')
                 .update(businessSyncFields)
                 .eq('company_id', currentEmployee.company_id)
-                .eq('hire_year', dbData.hire_year) // 업데이트된 입사년도 사용
+                .eq('hire_year', originalHireYear) // ✅ 원래 입사년도 사용 (동기화 대상 정확히 선택)
                 .eq('resigned', false) // 재직 중인 근로자만
                 .neq('id', req.params.id); // 현재 근로자 제외
             
