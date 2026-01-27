@@ -1,0 +1,138 @@
+{
+  "passed": [
+    {
+      "testName": "서버 연결",
+      "details": "HTTP 200",
+      "timestamp": "2026-01-27T06:22:06.785Z"
+    },
+    {
+      "testName": "기업 생성",
+      "details": "ID: 302878fe-518c-4099-9dcd-90472f98c8a7, Status: 201",
+      "timestamp": "2026-01-27T06:22:06.837Z"
+    },
+    {
+      "testName": "TO 설정",
+      "details": "2026년: 3명, 2027년: 5명",
+      "timestamp": "2026-01-27T06:22:06.979Z"
+    },
+    {
+      "testName": "기업 조회",
+      "details": "기업명: QA테스트기업_1769494926785",
+      "timestamp": "2026-01-27T06:22:07.012Z"
+    },
+    {
+      "testName": "기업 수정",
+      "details": "수수료율: 20%",
+      "timestamp": "2026-01-27T06:22:07.046Z"
+    },
+    {
+      "testName": "날짜 계산: 2024-08-31 + 6개월 (1차)",
+      "details": "날짜 일치: 2025-02-28",
+      "timestamp": "2026-01-27T06:22:07.169Z"
+    },
+    {
+      "testName": "날짜 계산: 2024-01-31 + 9개월 (2차)",
+      "details": "날짜 일치: 2024-10-31",
+      "timestamp": "2026-01-27T06:22:07.265Z"
+    },
+    {
+      "testName": "날짜 계산: 2024-03-31 + 6개월 (1차)",
+      "details": "날짜 일치: 2024-09-30",
+      "timestamp": "2026-01-27T06:22:07.368Z"
+    },
+    {
+      "testName": "날짜 계산: 2024-01-15 + 6개월 (1차)",
+      "details": "날짜 일치: 2024-07-15",
+      "timestamp": "2026-01-27T06:22:07.460Z"
+    },
+    {
+      "testName": "날짜 계산: 2024-05-20 + 9개월 (2차)",
+      "details": "날짜 일치: 2025-02-20",
+      "timestamp": "2026-01-27T06:22:07.572Z"
+    },
+    {
+      "testName": "TO 제한 - 기업 조회",
+      "details": "2026년 TO: 3명",
+      "timestamp": "2026-01-27T06:22:07.600Z"
+    },
+    {
+      "testName": "TO 제한 - 3명 추가",
+      "details": "성공: 3/3명",
+      "timestamp": "2026-01-27T06:22:08.016Z"
+    },
+    {
+      "testName": "TO 제한 - 초과 방지",
+      "details": "Status: 400, Message: 2026년 TO(정원) 3명이 모두 채워졌습니다. (현재 3명)",
+      "timestamp": "2026-01-27T06:22:08.077Z"
+    },
+    {
+      "testName": "수수료 - 근로자 생성",
+      "details": "ID: 97439636-d148-4a23-9e5a-e64e56e22fda",
+      "timestamp": "2026-01-27T06:22:08.408Z"
+    },
+    {
+      "testName": "수수료 - API 응답",
+      "details": "Status: 200",
+      "timestamp": "2026-01-27T06:22:08.448Z"
+    },
+    {
+      "testName": "퇴사 - 근로자 생성",
+      "details": "ID: c127ff9f-e00c-4837-8733-b40549b0bdec",
+      "timestamp": "2026-01-27T06:22:08.784Z"
+    },
+    {
+      "testName": "퇴사 - 처리 성공",
+      "details": "Status: 200",
+      "timestamp": "2026-01-27T06:22:08.882Z"
+    },
+    {
+      "testName": "퇴사 - 에러 없음",
+      "details": "Status: 200",
+      "timestamp": "2026-01-27T06:22:08.882Z"
+    },
+    {
+      "testName": "대시보드 - API 응답",
+      "details": "Status: 200",
+      "timestamp": "2026-01-27T06:22:08.921Z"
+    },
+    {
+      "testName": "대시보드 - 신청기한 도래 항목",
+      "details": "항목 수: 187",
+      "timestamp": "2026-01-27T06:22:08.921Z"
+    },
+    {
+      "testName": "대시보드 - 승인대기 항목",
+      "details": "항목 수: 0",
+      "timestamp": "2026-01-27T06:22:08.921Z"
+    },
+    {
+      "testName": "대시보드 - 신청기한 도래 데이터 구조",
+      "details": "필드: employeeId, companyId, companyName, employeeName, applicationRound, dueDate, type",
+      "timestamp": "2026-01-27T06:22:08.921Z"
+    }
+  ],
+  "failed": [
+    {
+      "testName": "동기화 - 근로자 생성",
+      "details": "근로자 생성 실패",
+      "timestamp": "2026-01-27T06:22:08.227Z"
+    },
+    {
+      "testName": "수수료 - 0원 처리",
+      "details": "0원 지급액 올바르게 처리됨",
+      "timestamp": "2026-01-27T06:22:08.690Z"
+    }
+  ],
+  "warnings": [
+    {
+      "testName": "수수료 - 정산 내역",
+      "message": "내역이 없음 (정상일 수 있음)",
+      "timestamp": "2026-01-27T06:22:08.449Z"
+    },
+    {
+      "testName": "대시보드 - 승인대기",
+      "message": "항목이 없음 (정상일 수 있음)",
+      "timestamp": "2026-01-27T06:22:08.921Z"
+    }
+  ]
+}

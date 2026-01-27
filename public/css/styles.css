@@ -1,0 +1,1526 @@
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Toss/Apple Minimal Palette */
+    --primary-blue: #3182F6;
+    --primary-blue-hover: #1B64DA;
+    --primary-blue-light: #F4F8FE;
+    --background-gray: #FAFBFC;
+    --sidebar-bg: #FFFFFF;
+    --text-primary: #191F28;
+    --text-secondary: #4E5968;
+    --text-tertiary: #8B95A1;
+    --border-light: #E5E8EB;
+    --border-color: #E5E8EB;
+    --card-bg: #FFFFFF;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 4px 16px 0 rgba(0, 0, 0, 0.06);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --warning-color: #F59E0B;
+    --error-color: #F04438;
+    --error-light: #FEF3F2;
+    --success-color: #12B76A;
+    --success-light: #F6FEF9;
+}
+
+* { 
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body { 
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    margin: 0; 
+    background-color: var(--background-gray);
+    color: var(--text-primary);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   레이아웃
+============================================ */
+.app-layout { 
+    display: flex; 
+    height: 100vh;
+    gap: 0;
+}
+
+/* ============================================
+   사이드바 - Toss Style
+============================================ */
+#sidebar { 
+    width: 280px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar-header { 
+    padding: 32px 24px 24px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h2 { 
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.btn-icon {
+    padding: 8px 12px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: var(--bg-light);
+    border-color: var(--primary-blue);
+    transform: scale(1.05);
+}
+
+#logout-btn:hover {
+    background: #FFE5E5 !important;
+    border-color: #FF3B30 !important;
+}
+
+#company-nav-list { 
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+}
+
+#company-nav-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#company-nav-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#company-nav-list::-webkit-scrollbar-thumb {
+    background-color: var(--border-light);
+    border-radius: 10px;
+}
+
+.nav-item { 
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 2px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.nav-item:hover { 
+    background-color: var(--background-gray);
+    color: var(--text-primary);
+}
+
+.nav-item.active { 
+    background-color: var(--primary-blue-light);
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+/* 기업 메뉴 버튼 스타일 */
+.nav-item-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.nav-item-wrapper .nav-item {
+    flex: 1;
+    min-width: 0;
+}
+
+.nav-item-wrapper:hover .btn-company-menu {
+    opacity: 1 !important;
+}
+
+.btn-company-menu {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    opacity: 0.2;
+    transition: opacity 0.2s, background 0.2s;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-company-menu:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    opacity: 1 !important;
+    color: var(--text-primary);
+}
+
+.btn-company-menu:active {
+    background-color: rgba(0, 0, 0, 0.1);
+    transform: scale(0.95);
+}
+
+.btn-email-access {
+    background-color: var(--primary-blue) !important;
+    opacity: 1 !important;
+    font-size: 14px !important;
+}
+
+.btn-email-access:hover {
+    background-color: var(--primary-blue-hover) !important;
+}
+
+#view-company-info-btn {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    transition: background-color 0.15s ease;
+}
+
+#view-company-info-btn:hover {
+    background-color: #059669;
+}
+
+.sidebar-footer { 
+    padding: 16px;
+    border-top: 1px solid var(--border-light);
+    margin-top: auto;
+}
+
+.sidebar-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    cursor: pointer;
+    color: var(--primary-blue);
+    font-weight: 600;
+    font-size: 15px;
+    transition: background-color 0.15s ease;
+    border-radius: var(--radius-md);
+    margin: 8px;
+}
+
+.sidebar-footer:hover { 
+    background-color: var(--primary-blue-light);
+}
+
+/* ============================================
+   메인 콘텐츠 - Toss Style
+============================================ */
+#main-content { 
+    flex-grow: 1;
+    padding: 32px 40px;
+    overflow-y: auto;
+    background-color: var(--background-gray);
+}
+
+.content-header { 
+    margin-bottom: 24px;
+}
+
+.content-header h1 { 
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+    letter-spacing: -0.6px;
+}
+
+.card { 
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   대시보드 - Toss Style
+============================================ */
+.dashboard-card { 
+    padding: 32px;
+}
+
+.dashboard-card h2 { 
+    margin: 0 0 24px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+.todo-item { 
+    display: flex;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-light);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.todo-item:last-child { 
+    border-bottom: none;
+}
+
+.todo-item:hover {
+    background-color: var(--background-gray);
+}
+
+.todo-item .name { 
+    font-weight: 600;
+    flex: 1;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.todo-item .name strong {
+    color: var(--primary-blue);
+}
+
+.todo-item .round { 
+    background-color: #FF6B6B;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 12px;
+}
+
+.todo-item .due-date { 
+    color: #FF6B6B;
+    font-weight: 600;
+    font-size: 14px;
+    background-color: #FFF5F5;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+/* 우선순위 배지 */
+.priority-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.priority-badge.critical {
+    background-color: #FF1744;
+    color: white;
+}
+
+.priority-badge.high {
+    background-color: #FF6F00;
+    color: white;
+}
+
+.priority-badge.warning {
+    background-color: #FFA000;
+    color: white;
+}
+
+.priority-badge.pending-badge {
+    background-color: #42A5F5;
+    color: white;
+}
+
+.priority-badge.urgent-badge {
+    background-color: #FF6B6B;
+    color: white;
+}
+
+/* 타입별 todo-item 스타일 */
+.todo-item.business {
+    border-left: 3px solid #FF1744;
+}
+
+.todo-item.hiring {
+    border-left: 3px solid #FF6F00;
+}
+
+.todo-item.subsidy {
+    border-left: 3px solid #3182F6;
+}
+
+.todo-item.confirmation {
+    border-left: 3px solid #FFA000;
+}
+
+.todo-item.pending-item {
+    border-left: 3px solid #42A5F5;
+}
+
+.todo-item .pending-date {
+    background-color: #42A5F5;
+    color: white;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.todo-item .urgent-date {
+    background-color: #FF6B6B;
+    color: white;
+    font-weight: 700;
+}
+
+.todo-item.pending-item.urgent {
+    border-left-color: #FF6B6B;
+}
+
+/* ============================================
+   급한 항목 강조 스타일
+============================================ */
+/* 🟡 7일 이내 (주의) */
+.todo-item.within-week {
+    background-color: #FFFBEB;
+    border-left: 4px solid #F59E0B !important;
+}
+
+.todo-item.within-week .due-date {
+    background-color: #F59E0B;
+    color: white;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* 🟠 3일 이내 (급함) */
+.todo-item.within-3days {
+    background-color: #FFF4ED;
+    border-left: 4px solid #FB923C !important;
+    animation: pulse-orange 2s infinite;
+}
+
+.todo-item.within-3days .due-date {
+    background-color: #FB923C;
+    color: white;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.todo-item.within-3days .name {
+    color: #EA580C;
+    font-weight: 700;
+}
+
+@keyframes pulse-orange {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(251, 146, 60, 0); }
+}
+
+.empty-state { 
+    text-align: center;
+    color: var(--text-tertiary);
+    padding: 80px 24px;
+    font-size: 15px;
+}
+
+/* ============================================
+   근로자 테이블 - Toss Style
+============================================ */
+.table-header { 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.table-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.table-wrapper { 
+    background-color: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+}
+
+table { 
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* 근로자 표 디자인 */
+th, td { 
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+}
+
+th { 
+    font-size: 12px;
+    color: var(--text-tertiary);
+    text-transform: none;
+    font-weight: 600;
+    background-color: var(--background-gray);
+    letter-spacing: -0.2px;
+    height: 48px;
+}
+
+td {
+    font-size: 14px;
+    color: var(--text-primary);
+    font-weight: 500;
+    height: 56px;
+}
+
+tbody tr:last-child td { 
+    border: none;
+}
+
+tbody tr { 
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+tbody tr:hover { 
+    background-color: var(--background-gray);
+}
+
+/* 퇴사자 행 스타일 */
+tbody tr.resigned-row {
+    background: repeating-linear-gradient(
+        45deg,
+        #F5F5F5,
+        #F5F5F5 10px,
+        #FAFAFA 10px,
+        #FAFAFA 20px
+    );
+    opacity: 0.85;
+    border-left: 4px solid #9E9E9E !important;
+}
+
+tbody tr.resigned-row:hover {
+    opacity: 1;
+    background: repeating-linear-gradient(
+        45deg,
+        #EEEEEE,
+        #EEEEEE 10px,
+        #F5F5F5 10px,
+        #F5F5F5 20px
+    );
+}
+
+tbody tr.resigned-row td {
+    color: #9E9E9E !important;
+    text-decoration: line-through;
+}
+
+tbody tr.resigned-row td:first-child {
+    font-weight: 400 !important;
+}
+
+.status-tag { 
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    transition: opacity 0.15s ease;
+}
+
+/* 상태별 태그 스타일 */
+.status-tag.waiting {
+    background-color: #F2F4F6;
+    color: #4E5968;
+}
+
+.status-tag.in-progress {
+    background-color: #E8F3FF;
+    color: #1B64DA;
+}
+
+.status-tag.approved {
+    background-color: #E5F8ED;
+    color: #03A66D;
+}
+
+.status-tag.subsidy-progress {
+    background-color: #FFF5E5;
+    color: #F57C00;
+}
+
+.status-tag.completed {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.status-tag.resigned {
+    background-color: #424242;
+    color: #FFFFFF;
+    font-weight: 600;
+    border: 2px solid #757575;
+}
+
+.status-tag.resigned::before {
+    content: "🚫 ";
+}
+
+/* 레거시 호환 */
+.status-tag.paid { 
+    background-color: #E8F5E9;
+    color: #2E7D32;
+}
+
+.status-tag.pending { 
+    background-color: #FFF3E0;
+    color: #EF6C00;
+}
+
+/* ============================================
+   버튼 - Toss Style
+============================================ */
+.btn-primary { 
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: -0.3px;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-blue-hover);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* ============================================
+   모달 - Toss Style
+============================================ */
+.modal { 
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content { 
+    background-color: var(--card-bg);
+    border-radius: var(--radius-xl);
+    width: 95%;
+    max-width: 1200px;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.modal-header { 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.modal-header h2 { 
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+/* 모달 헤더 버튼 스타일 */
+.btn-modal-resign,
+.btn-modal-delete {
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-modal-resign:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-modal-delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.close-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-tertiary);
+    font-size: 24px;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    background-color: var(--background-gray);
+    color: var(--text-primary);
+}
+
+.modal-body { 
+    padding: 32px;
+    max-height: 75vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background-color: var(--border-light);
+    border-radius: 10px;
+}
+
+.modal-footer { 
+    text-align: right;
+    padding: 20px 32px;
+    border-top: 1px solid var(--border-light);
+    background-color: var(--background-gray);
+}
+
+/* ============================================
+   탭 - Toss Style
+============================================ */
+.tab-nav { 
+    border-bottom: 2px solid var(--border-light);
+    margin-bottom: 28px;
+    display: flex;
+    gap: 8px;
+}
+
+.tab-btn { 
+    background: none;
+    border: none;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-tertiary);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+    margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+    color: var(--text-secondary);
+}
+
+.tab-btn.active { 
+    color: var(--primary-blue);
+    border-bottom-color: var(--primary-blue);
+}
+
+.tab-content { 
+    display: none;
+}
+
+.tab-content.active { 
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* ============================================
+   폼 요소 - Toss Style
+============================================ */
+.form-grid { 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-grid-wide {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.payment-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    background: var(--background-gray);
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    border-left: 4px solid var(--primary-blue);
+}
+
+.payment-row-title {
+    grid-column: 1 / -1;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 8px;
+}
+
+.form-group { 
+    margin-bottom: 20px;
+}
+
+.form-group label { 
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+
+.form-group input[type="date"],
+.form-group input[type="text"],
+.form-control { 
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    color: var(--text-primary);
+    transition: all 0.15s ease;
+    background-color: var(--background-gray);
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-control:focus { 
+    outline: none;
+    border-color: var(--primary-blue);
+    background-color: white;
+    box-shadow: 0 0 0 3px var(--primary-blue-light);
+}
+
+.checkbox-group { 
+    display: flex;
+    align-items: center;
+    margin-top: 12px;
+    gap: 10px;
+}
+
+.checkbox-group input[type="checkbox"] { 
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--primary-blue);
+}
+
+.checkbox-group label {
+    margin: 0;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* ============================================
+   토스트 & 로더 - Toss Style
+============================================ */
+#toast-container { 
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 2000;
+}
+
+.toast { 
+    background-color: #191F28;
+    color: white;
+    padding: 16px 24px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    margin-top: 12px;
+    animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-out 2.7s;
+    font-weight: 500;
+    font-size: 15px;
+    min-width: 200px;
+}
+
+.spinner { 
+    border: 3px solid var(--border-light);
+    border-radius: 50%;
+    border-top: 3px solid var(--primary-blue);
+    width: 48px;
+    height: 48px;
+    animation: spin 0.8s linear infinite;
+}
+
+#loader {
+    background-color: rgba(249, 250, 251, 0.8);
+    backdrop-filter: blur(4px);
+}
+
+.hidden { 
+    display: none !important;
+}
+
+/* ============================================
+   애니메이션
+============================================ */
+@keyframes spin { 
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideUp {
+    from { 
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from { 
+        transform: translateX(100px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   신청 기한 도래 항목 강조 표시
+============================================ */
+
+/* 대시보드 할일 항목 - 기한 지남 */
+/* 🔴 기한 지남 (매우 급함) */
+.todo-item.overdue {
+    background-color: #FEF3F2;
+    border-left: 5px solid #F04438 !important;
+    animation: pulse-red 2s infinite;
+}
+
+.todo-item.overdue .name {
+    color: #D32F2F;
+    font-weight: 700;
+}
+
+.todo-item .due-date.overdue {
+    background-color: #F04438;
+    color: white;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+@keyframes pulse-red {
+    0%, 100% { box-shadow: 0 2px 12px rgba(240, 68, 56, 0.15); }
+    50% { box-shadow: 0 4px 20px rgba(240, 68, 56, 0.3); }
+}
+
+/* 테이블 행 - 신청 필요 */
+.overdue-row {
+    background-color: #FFF9F9;
+    border-left: 3px solid #FF3B30;
+}
+
+.overdue-row:hover {
+    background-color: #FFF0F0;
+}
+
+.overdue-row td:first-child {
+    color: #D32F2F;
+    font-weight: 700;
+}
+
+/* 날짜 셀 - 기한 지남 */
+.overdue-date {
+    color: #FF3B30 !important;
+    font-weight: 700 !important;
+    background-color: #FFF5F5;
+    padding: 6px 10px !important;
+    border-radius: 6px;
+}
+
+/* 추가 애니메이션 */
+@keyframes pulseRed {
+    0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4);
+    }
+    50% { 
+        box-shadow: 0 0 0 8px rgba(255, 59, 48, 0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
+    }
+    50% { 
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.6);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+    20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* 검색창 스타일 개선 */
+#company-search,
+#employee-search {
+    background-color: var(--background-gray);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+#company-search:focus,
+#employee-search:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    background-color: white;
+    box-shadow: 0 0 0 3px var(--primary-blue-light);
+}
+
+#company-search::placeholder,
+#employee-search::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* ============================================
+   날짜 입력 + "오늘" 버튼
+============================================ */
+.date-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.date-input-wrapper input[type="date"] {
+    flex: 1;
+}
+
+.btn-today {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    background-color: var(--primary-blue-light);
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    letter-spacing: -0.3px;
+}
+
+.btn-today:hover {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+.btn-today:active {
+    transform: scale(0.98);
+}
+
+/* ============================================
+   지원금 금액 표시
+============================================ */
+.subsidy-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background-color: var(--background-gray);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+}
+
+.subsidy-card {
+    text-align: center;
+    padding: 16px;
+    background-color: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.15s ease;
+}
+
+.subsidy-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.subsidy-card.total {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+.subsidy-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.subsidy-card.total .subsidy-label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.subsidy-amount {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.subsidy-amount.received {
+    color: #2E7D32;
+}
+
+.subsidy-amount.pending {
+    color: #EF6C00;
+}
+
+.subsidy-amount.total {
+    color: white;
+}
+
+.subsidy-badge {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/* ============================================
+   연도별 구분 & 버튼
+============================================ */
+.year-section {
+    margin-bottom: 16px;
+}
+
+.year-header {
+    background-color: var(--primary-blue);
+    color: white;
+    padding: 8px 14px;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.year-section .table-wrapper {
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    margin-top: 0;
+}
+
+.btn-secondary {
+    background-color: white;
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: -0.3px;
+}
+
+.btn-secondary:hover {
+    background-color: var(--background-gray);
+    border-color: var(--border-color);
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 6px;
+    transition: all 0.2s;
+    border-radius: var(--radius-sm);
+}
+
+.btn-delete:hover {
+    background-color: #FFF5F5;
+    transform: scale(1.2);
+}
+
+.btn-resign:hover {
+    background-color: #E3F2FD;
+    transform: scale(1.2);
+}
+
+.employee-row {
+    cursor: pointer;
+}
+
+.employee-row:hover {
+    background-color: var(--background-gray) !important;
+}
+
+/* ============================================
+   수수료 정산 스타일
+============================================ */
+
+/* 통계 카드 */
+.commission-stat-card {
+    padding: 24px;
+    border-radius: 12px;
+    color: white;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.15s ease;
+}
+
+.commission-stat-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.commission-stat-card .stat-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.commission-stat-card .stat-label {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.commission-stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* 월별 카드 */
+.commission-month-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.commission-month-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.commission-month-header {
+    padding: 20px 24px;
+    background-color: var(--background-gray);
+    border-bottom: 1px solid var(--border-light);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.15s ease;
+    user-select: none;
+}
+
+.commission-month-header:hover {
+    background-color: #F2F4F6;
+}
+
+.commission-toggle-icon {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+    display: inline-block;
+    color: var(--text-secondary);
+}
+
+.commission-month-card.collapsed .commission-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.commission-month-card.collapsed .commission-month-body {
+    max-height: 0;
+    opacity: 0;
+    padding: 0;
+}
+
+.commission-month-body {
+    max-height: 2000px;
+    opacity: 1;
+    padding: 24px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.commission-badge {
+    background: white;
+    color: var(--primary-color);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.commission-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.commission-summary-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.commission-summary-value {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+/* 수수료 테이블 */
+.commission-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.commission-table thead th {
+    background: #f8f9fa;
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.commission-table-row {
+    transition: all 0.2s;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.commission-table-row:hover {
+    background: #f8f9fa;
+}
+
+.commission-table-row td {
+    padding: 16px;
+}
+
+.commission-rate-badge {
+    background-color: #E8F3FF;
+    color: #1565c0;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.commission-count-badge {
+    background-color: #F3E5F5;
+    color: #6a1b9a;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.btn-commission-detail {
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-commission-detail:hover {
+    background-color: var(--primary-blue-hover);
+}
+
+/* 상세 모달 스타일 */
+.commission-detail-card {
+    padding: 16px;
+    background-color: var(--background-gray);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    transition: box-shadow 0.15s ease;
+}
+
+.commission-detail-card:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.commission-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.commission-detail-table thead th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.commission-detail-row {
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.2s;
+}
+
+.commission-detail-row:hover {
+    background: #f8f9fa;
+}
+
+.commission-detail-row td {
+    padding: 14px 12px;
+}
+
+.commission-round-badge {
+    background-color: #FFF3E0;
+    color: #e65100;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* 애니메이션 */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        max-height: 0;
+        opacity: 0;
+    }
+    to {
+        max-height: 2000px;
+        opacity: 1;
+    }
+}
+
+
+

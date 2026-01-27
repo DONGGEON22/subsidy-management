@@ -1,0 +1,13 @@
+node_modules
+.env.local
+.env
+*.log
+.DS_Store
+test_date_calculation.js
+setup-admin-password.js
+generate-default-password.js
+get-hash.js
+comprehensive-api-qa.js
+playwright.config.js
+tests/
+

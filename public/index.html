@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지원금 관리 시스템</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <script>
+        // 인증 체크
+        (async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check', {
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                
+                if (!result.authenticated) {
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('인증 체크 오류:', error);
+                window.location.href = '/login.html';
+            }
+        })();
+    </script>
+    
+    <div class="app-layout">
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <h2>기업 관리</h2>
+                <div style="display: flex; gap: 8px;">
+                    <button id="change-password-btn" class="btn-icon" title="비밀번호 변경">🔑</button>
+                    <button id="logout-btn" class="btn-icon" title="로그아웃">🚪</button>
+                </div>
+            </div>
+            <nav id="company-nav-list"></nav>
+            <div id="add-company-btn" class="sidebar-footer">+ 새 기업 추가</div>
+        </aside>
+
+        <main id="main-content"></main>
+    </div>
+
+    <div id="employee-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modal-title"></h2><span class="close-btn" data-modal-id="employee-modal">&times;</span></div>
+            <div class="modal-body">
+                <div class="tab-nav">
+                    <button class="tab-btn active" data-tab="tab-preliminary">사전 단계</button>
+                    <button class="tab-btn" data-tab="tab-payments">기업 지원금</button>
+                    <button class="tab-btn" data-tab="tab-youth" id="tab-youth-btn">채용자 지원금</button>
+                    <button class="tab-btn" data-tab="tab-memo">메모/히스토리</button>
+                </div>
+                <form id="employee-details-form">
+                    <div id="tab-preliminary" class="tab-content active"></div>
+                    <div id="tab-payments" class="tab-content"></div>
+                    <div id="tab-youth" class="tab-content"></div>
+                    <div id="tab-memo" class="tab-content"></div>
+                    <div class="modal-footer"><button type="submit" class="btn-primary">저장하기</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="form-modal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 id="form-modal-title"></h2>
+                <span class="close-btn" data-modal-id="form-modal">&times;</span>
+            </div>
+            <form id="generic-form">
+                <div class="modal-body" id="form-modal-body">
+                    </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">확인</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 비밀번호 변경 모달 -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>비밀번호 변경</h2>
+                <span class="close-btn" data-modal-id="password-modal">&times;</span>
+            </div>
+            <form id="password-change-form">
+                <div class="modal-body">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">현재 비밀번호</label>
+                        <input 
+                            type="password" 
+                            id="current-password" 
+                            name="currentPassword"
+                            placeholder="현재 비밀번호를 입력하세요"
+                            required
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;"
+                        >
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">새 비밀번호</label>
+                        <input 
+                            type="password" 
+                            id="new-password" 
+                            name="newPassword"
+                            placeholder="새 비밀번호 (8자 이상)"
+                            required
+                            minlength="8"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;"
+                        >
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">새 비밀번호 확인</label>
+                        <input 
+                            type="password" 
+                            id="confirm-password" 
+                            name="confirmPassword"
+                            placeholder="새 비밀번호를 다시 입력하세요"
+                            required
+                            minlength="8"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;"
+                        >
+                    </div>
+                    <div style="padding: 12px; background: #FFF9E6; border-radius: 8px; font-size: 13px; color: #856404;">
+                        ⚠️ 비밀번호 변경 후 <strong>서버 재시작</strong>이 필요할 수 있습니다.<br>
+                        콘솔에 표시되는 안내를 따라주세요.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary">변경하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="loader" class="modal hidden"><div class="spinner"></div></div>
+    <div id="toast-container"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
+
+
+
