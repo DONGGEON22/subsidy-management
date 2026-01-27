@@ -363,43 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContent.innerHTML = `
             <div class="content-header"><h1>대시보드</h1></div>
             
-            ${state.urgentTasks && state.urgentTasks.length > 0 ? `
-            <div class="card dashboard-card" style="background: #FEF2F2; border: 1px solid #FCA5A5; border-left: 4px solid #EF4444;">
-                <h2 style="color: #991B1B; display: flex; align-items: center; gap: 8px; font-size: 18px;">
-                    🚨 긴급! 채용자통보 3개월 기한
-                </h2>
-                <div style="margin-bottom: 16px; padding: 12px; background: white; border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); border: 1px solid #FED7D7;">
-                    ⚠️ 입사일로부터 3개월 이내에 채용자통보를 완료하지 않으면 지원금을 받을 수 없습니다!
-                </div>
-                <div id="urgent-list">
-                ${state.urgentTasks.map(task => {
-                    const isOverdueTask = task.daysUntilDeadline < 0;
-                    const urgencyMessage = task.message || '';
-                    
-                    return `<div class="todo-item" 
-                                 data-employee-id="${task.employeeId}" 
-                                 data-company-id="${task.companyId}"
-                                 style="border: 1px solid ${isOverdueTask ? '#EF4444' : '#F59E0B'}; border-left: 3px solid ${isOverdueTask ? '#EF4444' : '#F59E0B'}; background: white; margin-bottom: 8px;">
-                        <span class="name">
-                            🚨 <strong>${task.companyName}</strong> ${task.employeeName}
-                            <span class="priority-badge" style="background: ${isOverdueTask ? '#EF4444' : '#F59E0B'}; color: white; font-size: 12px; padding: 3px 8px;">
-                                ${isOverdueTask ? '기한초과' : '급함'}
-                            </span>
-                        </span>
-                        <span class="round" style="color: ${isOverdueTask ? '#DC2626' : '#D97706'}; font-weight: 600;">📋 채용자통보 (3개월 기한)</span>
-                        <span class="due-date" style="font-weight: 600; font-size: 13px; color: ${isOverdueTask ? '#DC2626' : '#D97706'};">
-                            ${isOverdueTask ? '🚫' : '⏰'} ${urgencyMessage}
-                            <div style="font-size: 11px; color: #6B7280; margin-top: 2px; font-weight: 400;">
-                                입사: ${task.hireDate} → 기한: ${task.dueDate}
-                            </div>
-                        </span>
-                    </div>`;
-                }).join('')}
-                </div>
-            </div>
-            ` : ''}
-            
-            <div class="card dashboard-card" ${state.urgentTasks && state.urgentTasks.length > 0 ? 'style="margin-top: 24px;"' : ''}>
+            <div class="card dashboard-card">
                 <h2>⚠️ 신청 기한 도래 항목</h2>
                 <div style="margin-bottom: 16px; padding: 12px; background: var(--background-gray); border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary);">
                     <strong>순서:</strong> ① 사업신청 (입사일+2개월) → ② 채용자통보 (사업신청+2개월) → ③ 1~4차 지원금 신청
