@@ -822,10 +822,38 @@ app.get('/api/dashboard', requireAuth, async (req, res) => {
         
         const upcoming = [];
         const pending = [];
+        const urgent = []; // 🚨 입사일 + 3개월 이내 채용자통보 미완료 (지원금 박탈 위험!)
         
         (employees || []).forEach(emp => {
             const hireYear = emp.hire_year || (emp.hire_date ? new Date(emp.hire_date).getFullYear() : 9999);
             const maxRound = (hireYear > 0 && hireYear <= 2024) ? 4 : 3;
+            
+            // 🚨 입사일 + 3개월 이내 채용자통보 미완료 체크 (가장 중요!)
+            if (emp.hire_date && !emp.hiring_notify_complete) {
+                const hireDate = new Date(emp.hire_date);
+                const threeMonthsLater = new Date(hireDate);
+                threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+                
+                const daysUntilDeadline = Math.floor((threeMonthsLater - today) / (1000 * 60 * 60 * 24));
+                
+                // 3개월 기한이 다가오거나 지난 경우 (30일 전부터 경고)
+                if (daysUntilDeadline <= 30) {
+                    urgent.push({
+                        employeeId: emp.id,
+                        companyId: emp.company_id,
+                        companyName: emp.companies?.name,
+                        employeeName: emp.name,
+                        applicationRound: '🚨 채용자통보 (3개월 기한)',
+                        dueDate: threeMonthsLater.toISOString().split('T')[0],
+                        hireDate: emp.hire_date,
+                        daysUntilDeadline,
+                        type: 'urgent_hiring',
+                        message: daysUntilDeadline < 0 
+                            ? `기한 ${Math.abs(daysUntilDeadline)}일 초과! 지원금 불가능!` 
+                            : `${daysUntilDeadline}일 남음 - 급함!!`
+                    });
+                }
+            }
             
             // 사업신청 기한 확인
             if (emp.business_applied_date && !emp.business_applied_complete) {
@@ -944,8 +972,10 @@ app.get('/api/dashboard', requireAuth, async (req, res) => {
         
         console.log('📊 대시보드 데이터 생성:', {
             totalEmployees: employees.length,
+            urgentCount: urgent.length,
             upcomingCount: upcoming.length,
             pendingCount: pending.length,
+            urgentSample: urgent.slice(0, 3),
             upcomingSample: upcoming.slice(0, 3),
             pendingSample: pending.slice(0, 3)
         });
@@ -953,6 +983,7 @@ app.get('/api/dashboard', requireAuth, async (req, res) => {
         res.json({
             success: true,
             data: {
+                urgent,    // 🚨 가장 급한 항목 (입사일 + 3개월 기한)
                 upcoming,
                 pending
             }

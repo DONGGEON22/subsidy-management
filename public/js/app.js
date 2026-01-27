@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allEmployees: [],
         employees: [],
         filteredEmployees: [],
+        urgentTasks: [],    // 🚨 긴급 항목 (입사일 + 3개월 기한)
         upcomingTasks: [],
         pendingTasks: [],
         selectedCompanyId: null,
@@ -362,7 +363,43 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContent.innerHTML = `
             <div class="content-header"><h1>대시보드</h1></div>
             
-            <div class="card dashboard-card">
+            ${state.urgentTasks && state.urgentTasks.length > 0 ? `
+            <div class="card dashboard-card" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%); color: white; border: 3px solid #D32F2F; box-shadow: 0 8px 24px rgba(255, 82, 82, 0.3);">
+                <h2 style="color: white; display: flex; align-items: center; gap: 12px;">
+                    🚨 <span style="animation: pulse 1.5s ease-in-out infinite;">긴급! 채용자통보 3개월 기한</span> 🚨
+                </h2>
+                <div style="margin-bottom: 16px; padding: 16px; background: rgba(255, 255, 255, 0.2); border-radius: var(--radius-md); font-size: 14px; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3);">
+                    ⚠️ <strong>입사일로부터 3개월 이내에 채용자통보를 완료하지 않으면 지원금을 받을 수 없습니다!</strong>
+                </div>
+                <div id="urgent-list" style="background: rgba(255, 255, 255, 0.95); border-radius: var(--radius-md); padding: 16px; color: var(--text-primary);">
+                ${state.urgentTasks.map(task => {
+                    const isOverdueTask = task.daysUntilDeadline < 0;
+                    const urgencyMessage = task.message || '';
+                    
+                    return `<div class="todo-item overdue" 
+                                 data-employee-id="${task.employeeId}" 
+                                 data-company-id="${task.companyId}"
+                                 style="border: 3px solid #FF5252; background: ${isOverdueTask ? '#FFEBEE' : '#FFF3E0'}; margin-bottom: 12px;">
+                        <span class="name">
+                            🚨 <strong style="color: #D32F2F;">${task.companyName}</strong> ${task.employeeName}
+                            <span class="priority-badge critical" style="background: #D32F2F; font-size: 13px; padding: 4px 10px;">
+                                ${isOverdueTask ? '기한초과!' : '급함!!'}
+                            </span>
+                        </span>
+                        <span class="round" style="color: #D32F2F; font-weight: 700;">${task.applicationRound}</span>
+                        <span class="due-date overdue" style="font-weight: 700; font-size: 14px;">
+                            ${isOverdueTask ? '🚫' : '⏰'} ${urgencyMessage}
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                입사: ${task.hireDate} → 기한: ${task.dueDate}
+                            </div>
+                        </span>
+                    </div>`;
+                }).join('')}
+                </div>
+            </div>
+            ` : ''}
+            
+            <div class="card dashboard-card" ${state.urgentTasks && state.urgentTasks.length > 0 ? 'style="margin-top: 24px;"' : ''}>
                 <h2>⚠️ 신청 기한 도래 항목</h2>
                 <div style="margin-bottom: 16px; padding: 12px; background: var(--background-gray); border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary);">
                     <strong>순서:</strong> ① 사업신청 (입사일+2개월) → ② 채용자통보 (사업신청+2개월) → ③ 1~4차 지원금 신청
@@ -508,98 +545,109 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 0);
     };
 
-    // 회계 양식 엑셀 내보내기
-    const exportCommissionToExcel = (yearMonth, companies, lastDay) => {
+    // 회계 양식 엑셀 내보내기 (템플릿 기반)
+    const exportCommissionToExcel = async (yearMonth, companies, lastDay) => {
         if (!window.XLSX) {
             showToast('Excel 라이브러리 로딩 실패', true);
             return;
         }
         
-        // 날짜 파싱 (예: "2025-01" -> lastDay = "2025-01-31")
-        const [year, month] = yearMonth.split('-');
-        const monthEndDate = lastDay || `${year}-${month}-${new Date(year, month, 0).getDate()}`;
+        showLoader();
         
-        // 엑셀 데이터 배열
-        const excelData = [];
-        
-        // 헤더 행
-        excelData.push([
-            '거래일자',
-            '구분',
-            '거래처명',
-            '등록번호',
-            '부가세구분',
-            '프로젝트/창고',
-            '창고',
-            '품목월일',
-            '품목코드',
-            '품목명',
-            '규격',
-            '수량',
-            '단위',
-            '단가',
-            '공급가액',
-            '세액'
-        ]);
-        
-        // 각 기업별로 행 추가
-        Object.entries(companies).forEach(([companyId, company]) => {
-            const companyName = company.기업명 || '';
-            const businessNumber = company.사업자번호 || '';
-            const commissionAmount = company.수수료; // 수수료 금액 (부가세 별도)
-            const taxAmount = Math.round(commissionAmount * 0.1); // 세액 = 수수료 * 10%
+        try {
+            // 템플릿 파일 다운로드
+            const response = await fetch('/매출거래명세표일괄등록.xls');
+            if (!response.ok) {
+                throw new Error('템플릿 파일을 찾을 수 없습니다');
+            }
             
-            excelData.push([
-                monthEndDate,           // 거래일자: 말일
-                '사업자',                // 구분
-                companyName,            // 거래처명
-                businessNumber,         // 등록번호
-                '별도',                  // 부가세구분: 무조건 "별도"
-                '',                     // 프로젝트/창고: 공란
-                '',                     // 창고: 공란
-                monthEndDate,           // 품목월일: 말일
-                '',                     // 품목코드: 공란
-                '경리아웃소싱 대행 수수료', // 품목명
-                '',                     // 규격: 공란
-                1,                      // 수량: 1
-                '건',                   // 단위
-                commissionAmount,       // 단가
-                commissionAmount,       // 공급가액: 수수료 금액
-                taxAmount               // 세액: 수수료 * 10%
-            ]);
-        });
-        
-        // 워크북 생성
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(excelData);
-        
-        // 열 너비 설정
-        ws['!cols'] = [
-            { wch: 12 },  // 거래일자
-            { wch: 10 },  // 구분
-            { wch: 20 },  // 거래처명
-            { wch: 15 },  // 등록번호
-            { wch: 10 },  // 부가세구분
-            { wch: 12 },  // 프로젝트/창고
-            { wch: 10 },  // 창고
-            { wch: 12 },  // 품목월일
-            { wch: 10 },  // 품목코드
-            { wch: 25 },  // 품목명
-            { wch: 10 },  // 규격
-            { wch: 8 },   // 수량
-            { wch: 8 },   // 단위
-            { wch: 12 },  // 단가
-            { wch: 12 },  // 공급가액
-            { wch: 12 }   // 세액
-        ];
-        
-        XLSX.utils.book_append_sheet(wb, ws, '회계양식');
-        
-        // 파일 다운로드
-        const fileName = `회계양식_${yearMonth}.xlsx`;
-        XLSX.writeFile(wb, fileName);
-        
-        showToast(`${fileName} 다운로드 완료!`);
+            const arrayBuffer = await response.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            
+            // 첫 번째 시트 가져오기
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            
+            // 시트를 배열로 변환 (헤더 포함)
+            const existingData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+            
+            // 날짜 파싱 (예: "2025-01" -> lastDay = "2025-01-31")
+            const [year, month] = yearMonth.split('-');
+            const monthEndDate = lastDay || `${year}-${month}-${new Date(year, month, 0).getDate()}`;
+            
+            // 각 기업별로 행 생성
+            const newRows = [];
+            Object.entries(companies).forEach(([companyId, company]) => {
+                const companyName = company.기업명 || '';
+                const businessNumber = company.사업자번호 || '';
+                const commissionAmount = company.수수료; // 수수료 금액 (부가세 별도)
+                const taxAmount = Math.round(commissionAmount * 0.1); // 세액 = 수수료 * 10%
+                
+                newRows.push([
+                    monthEndDate,           // 거래일자: 말일
+                    '사업자',                // 구분
+                    companyName,            // 거래처명
+                    businessNumber,         // 등록번호
+                    '별도',                  // 부가세구분: 무조건 "별도"
+                    '',                     // 프로젝트/창고: 공란
+                    '',                     // 창고: 공란
+                    monthEndDate,           // 품목월일: 말일
+                    '',                     // 품목코드: 공란
+                    '경리아웃소싱 대행 수수료', // 품목명
+                    '',                     // 규격: 공란
+                    1,                      // 수량: 1
+                    '건',                   // 단위
+                    commissionAmount,       // 단가
+                    commissionAmount,       // 공급가액: 수수료 금액
+                    taxAmount               // 세액: 수수료 * 10%
+                ]);
+            });
+            
+            // 기존 데이터와 새 데이터 합치기
+            // 헤더 행이 있다고 가정하고, 그 뒤에 데이터 추가
+            const combinedData = [...existingData, ...newRows];
+            
+            // 새 시트 생성
+            const newWorksheet = XLSX.utils.aoa_to_sheet(combinedData);
+            
+            // 기존 시트의 열 너비가 있으면 유지, 없으면 기본값 설정
+            if (!newWorksheet['!cols']) {
+                newWorksheet['!cols'] = [
+                    { wch: 12 },  // 거래일자
+                    { wch: 10 },  // 구분
+                    { wch: 20 },  // 거래처명
+                    { wch: 15 },  // 등록번호
+                    { wch: 10 },  // 부가세구분
+                    { wch: 12 },  // 프로젝트/창고
+                    { wch: 10 },  // 창고
+                    { wch: 12 },  // 품목월일
+                    { wch: 10 },  // 품목코드
+                    { wch: 25 },  // 품목명
+                    { wch: 10 },  // 규격
+                    { wch: 8 },   // 수량
+                    { wch: 8 },   // 단위
+                    { wch: 12 },  // 단가
+                    { wch: 12 },  // 공급가액
+                    { wch: 12 }   // 세액
+                ];
+            }
+            
+            // 새 워크북 생성
+            const newWorkbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, sheetName);
+            
+            // 파일 다운로드
+            const fileName = `매출거래명세표_${yearMonth}.xls`;
+            XLSX.writeFile(newWorkbook, fileName);
+            
+            hideLoader();
+            showToast(`${fileName} 다운로드 완료! (${newRows.length}개 기업 추가)`);
+            
+        } catch (error) {
+            hideLoader();
+            console.error('Excel 생성 오류:', error);
+            showToast('Excel 파일 생성 중 오류 발생: ' + error.message, true);
+        }
     };
 
     const renderCommissionView = async (selectedYearMonth = null) => {
@@ -1925,13 +1973,16 @@ document.addEventListener('DOMContentLoaded', () => {
             
             state.companies = companiesResult.data || [];
             state.allEmployees = employeesResult.data || [];
+            state.urgentTasks = dashboardResult.data?.urgent || [];      // 🚨 긴급 항목
             state.upcomingTasks = dashboardResult.data?.upcoming || [];
             state.pendingTasks = dashboardResult.data?.pending || [];
             state.dataLoaded = true;
             
             console.log('📊 대시보드 데이터 로드:', {
+                urgent: state.urgentTasks.length,
                 upcoming: state.upcomingTasks.length,
                 pending: state.pendingTasks.length,
+                urgentTasks: state.urgentTasks,
                 upcomingTasks: state.upcomingTasks,
                 pendingTasks: state.pendingTasks,
                 dashboardResult: dashboardResult
