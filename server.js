@@ -1,7 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -14,32 +15,32 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// JWT 시크릿 키
+const JWT_SECRET = process.env.JWT_SECRET || 'subsidy-mgmt-jwt-secret-key-2026-very-secure-string';
+
 // 미들웨어
 app.use(cors({
     origin: true,
     credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
 
-// 세션 설정
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'subsidy-mgmt-secret-key-2026-secure-random-string',
-    resave: true, // Serverless 환경을 위해 true로 변경
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === 'production', // 프로덕션에서는 HTTPS 필수
-        httpOnly: true,
-        sameSite: 'lax', // CSRF 보호
-        maxAge: 24 * 60 * 60 * 1000 // 24시간
-    }
-}));
-
-// 인증 미들웨어
+// 인증 미들웨어 (JWT 기반)
 const requireAuth = (req, res, next) => {
-    if (req.session && req.session.isAdmin) {
-        return next();
+    const token = req.cookies.auth_token;
+    
+    if (!token) {
+        return res.status(401).json({ success: false, error: '로그인이 필요합니다.' });
     }
-    res.status(401).json({ success: false, error: '로그인이 필요합니다.' });
+    
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(401).json({ success: false, error: '인증이 만료되었습니다. 다시 로그인해주세요.' });
+    }
 };
 
 // 정적 파일 제공 (로그인 페이지는 인증 없이 접근 가능)
@@ -125,9 +126,20 @@ app.post('/api/auth/login', async (req, res) => {
             });
         }
 
-        // 세션에 관리자 정보 저장
-        req.session.isAdmin = true;
-        req.session.username = username;
+        // JWT 토큰 생성
+        const token = jwt.sign(
+            { username, isAdmin: true },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        // 쿠키에 토큰 저장
+        res.cookie('auth_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000 // 24시간
+        });
 
         console.log(`✅ 관리자 로그인 성공: ${username}`);
 
@@ -135,7 +147,7 @@ app.post('/api/auth/login', async (req, res) => {
             success: true,
             message: '로그인 성공',
             user: {
-                username: username,
+                username,
                 isAdmin: true
             }
         });
@@ -147,29 +159,51 @@ app.post('/api/auth/login', async (req, res) => {
 
 // 로그아웃
 app.post('/api/auth/logout', (req, res) => {
-    const username = req.session.username;
-    req.session.destroy((err) => {
-        if (err) {
-            console.error('로그아웃 오류:', err);
-            return res.status(500).json({ success: false, error: '로그아웃 실패' });
+    const token = req.cookies.auth_token;
+    let username = '관리자';
+    
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            username = decoded.username;
+        } catch (e) {
+            // 토큰이 유효하지 않아도 로그아웃은 진행
         }
-        console.log(`✅ 로그아웃: ${username || '관리자'}`);
-        res.json({ success: true, message: '로그아웃되었습니다.' });
+    }
+    
+    // 쿠키 삭제
+    res.clearCookie('auth_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
     });
+    
+    console.log(`✅ 로그아웃: ${username}`);
+    res.json({ success: true, message: '로그아웃되었습니다.' });
 });
 
-// 세션 확인
+// 인증 확인
 app.get('/api/auth/check', (req, res) => {
-    if (req.session && req.session.isAdmin) {
+    const token = req.cookies.auth_token;
+    
+    if (!token) {
+        return res.json({
+            success: true,
+            authenticated: false
+        });
+    }
+    
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
         res.json({
             success: true,
             authenticated: true,
             user: {
-                username: req.session.username,
-                isAdmin: true
+                username: decoded.username,
+                isAdmin: decoded.isAdmin
             }
         });
-    } else {
+    } catch (error) {
         res.json({
             success: true,
             authenticated: false
