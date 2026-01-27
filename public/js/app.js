@@ -364,32 +364,32 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="content-header"><h1>대시보드</h1></div>
             
             ${state.urgentTasks && state.urgentTasks.length > 0 ? `
-            <div class="card dashboard-card" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%); color: white; border: 3px solid #D32F2F; box-shadow: 0 8px 24px rgba(255, 82, 82, 0.3);">
-                <h2 style="color: white; display: flex; align-items: center; gap: 12px;">
-                    🚨 <span style="animation: pulse 1.5s ease-in-out infinite;">긴급! 채용자통보 3개월 기한</span> 🚨
+            <div class="card dashboard-card" style="background: #FEF2F2; border: 1px solid #FCA5A5; border-left: 4px solid #EF4444;">
+                <h2 style="color: #991B1B; display: flex; align-items: center; gap: 8px; font-size: 18px;">
+                    🚨 긴급! 채용자통보 3개월 기한
                 </h2>
-                <div style="margin-bottom: 16px; padding: 16px; background: rgba(255, 255, 255, 0.2); border-radius: var(--radius-md); font-size: 14px; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3);">
-                    ⚠️ <strong>입사일로부터 3개월 이내에 채용자통보를 완료하지 않으면 지원금을 받을 수 없습니다!</strong>
+                <div style="margin-bottom: 16px; padding: 12px; background: white; border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); border: 1px solid #FED7D7;">
+                    ⚠️ 입사일로부터 3개월 이내에 채용자통보를 완료하지 않으면 지원금을 받을 수 없습니다!
                 </div>
-                <div id="urgent-list" style="background: rgba(255, 255, 255, 0.95); border-radius: var(--radius-md); padding: 16px; color: var(--text-primary);">
+                <div id="urgent-list">
                 ${state.urgentTasks.map(task => {
                     const isOverdueTask = task.daysUntilDeadline < 0;
                     const urgencyMessage = task.message || '';
                     
-                    return `<div class="todo-item overdue" 
+                    return `<div class="todo-item" 
                                  data-employee-id="${task.employeeId}" 
                                  data-company-id="${task.companyId}"
-                                 style="border: 3px solid #FF5252; background: ${isOverdueTask ? '#FFEBEE' : '#FFF3E0'}; margin-bottom: 12px;">
+                                 style="border: 1px solid ${isOverdueTask ? '#EF4444' : '#F59E0B'}; border-left: 3px solid ${isOverdueTask ? '#EF4444' : '#F59E0B'}; background: white; margin-bottom: 8px;">
                         <span class="name">
-                            🚨 <strong style="color: #D32F2F;">${task.companyName}</strong> ${task.employeeName}
-                            <span class="priority-badge critical" style="background: #D32F2F; font-size: 13px; padding: 4px 10px;">
-                                ${isOverdueTask ? '기한초과!' : '급함!!'}
+                            🚨 <strong>${task.companyName}</strong> ${task.employeeName}
+                            <span class="priority-badge" style="background: ${isOverdueTask ? '#EF4444' : '#F59E0B'}; color: white; font-size: 12px; padding: 3px 8px;">
+                                ${isOverdueTask ? '기한초과' : '급함'}
                             </span>
                         </span>
-                        <span class="round" style="color: #D32F2F; font-weight: 700;">${task.applicationRound}</span>
-                        <span class="due-date overdue" style="font-weight: 700; font-size: 14px;">
+                        <span class="round" style="color: ${isOverdueTask ? '#DC2626' : '#D97706'}; font-weight: 600;">📋 채용자통보 (3개월 기한)</span>
+                        <span class="due-date" style="font-weight: 600; font-size: 13px; color: ${isOverdueTask ? '#DC2626' : '#D97706'};">
                             ${isOverdueTask ? '🚫' : '⏰'} ${urgencyMessage}
-                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                            <div style="font-size: 11px; color: #6B7280; margin-top: 2px; font-weight: 400;">
                                 입사: ${task.hireDate} → 기한: ${task.dueDate}
                             </div>
                         </span>
@@ -603,9 +603,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]);
             });
             
-            // 기존 데이터와 새 데이터 합치기
-            // 헤더 행이 있다고 가정하고, 그 뒤에 데이터 추가
-            const combinedData = [...existingData, ...newRows];
+            // 헤더만 유지하고 2행부터 새 데이터 추가
+            // 1행 = 헤더, 2행부터 = 새 데이터
+            const headerRow = existingData.length > 0 ? [existingData[0]] : [];
+            const combinedData = [...headerRow, ...newRows];
             
             // 새 시트 생성
             const newWorksheet = XLSX.utils.aoa_to_sheet(combinedData);
