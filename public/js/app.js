@@ -508,6 +508,100 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 0);
     };
 
+    // 회계 양식 엑셀 내보내기
+    const exportCommissionToExcel = (yearMonth, companies, lastDay) => {
+        if (!window.XLSX) {
+            showToast('Excel 라이브러리 로딩 실패', true);
+            return;
+        }
+        
+        // 날짜 파싱 (예: "2025-01" -> lastDay = "2025-01-31")
+        const [year, month] = yearMonth.split('-');
+        const monthEndDate = lastDay || `${year}-${month}-${new Date(year, month, 0).getDate()}`;
+        
+        // 엑셀 데이터 배열
+        const excelData = [];
+        
+        // 헤더 행
+        excelData.push([
+            '거래일자',
+            '구분',
+            '거래처명',
+            '등록번호',
+            '부가세구분',
+            '프로젝트/창고',
+            '창고',
+            '품목월일',
+            '품목코드',
+            '품목명',
+            '규격',
+            '수량',
+            '단위',
+            '단가',
+            '공급가액',
+            '세액'
+        ]);
+        
+        // 각 기업별로 행 추가
+        Object.entries(companies).forEach(([companyId, company]) => {
+            const companyName = company.기업명 || '';
+            const businessNumber = company.사업자번호 || '';
+            const commissionAmount = company.수수료; // 수수료 금액 (부가세 별도)
+            const taxAmount = Math.round(commissionAmount * 0.1); // 세액 = 수수료 * 10%
+            
+            excelData.push([
+                monthEndDate,           // 거래일자: 말일
+                '사업자',                // 구분
+                companyName,            // 거래처명
+                businessNumber,         // 등록번호
+                '별도',                  // 부가세구분: 무조건 "별도"
+                '',                     // 프로젝트/창고: 공란
+                '',                     // 창고: 공란
+                monthEndDate,           // 품목월일: 말일
+                '',                     // 품목코드: 공란
+                '경리아웃소싱 대행 수수료', // 품목명
+                '',                     // 규격: 공란
+                1,                      // 수량: 1
+                '건',                   // 단위
+                commissionAmount,       // 단가
+                commissionAmount,       // 공급가액: 수수료 금액
+                taxAmount               // 세액: 수수료 * 10%
+            ]);
+        });
+        
+        // 워크북 생성
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+        
+        // 열 너비 설정
+        ws['!cols'] = [
+            { wch: 12 },  // 거래일자
+            { wch: 10 },  // 구분
+            { wch: 20 },  // 거래처명
+            { wch: 15 },  // 등록번호
+            { wch: 10 },  // 부가세구분
+            { wch: 12 },  // 프로젝트/창고
+            { wch: 10 },  // 창고
+            { wch: 12 },  // 품목월일
+            { wch: 10 },  // 품목코드
+            { wch: 25 },  // 품목명
+            { wch: 10 },  // 규격
+            { wch: 8 },   // 수량
+            { wch: 8 },   // 단위
+            { wch: 12 },  // 단가
+            { wch: 12 },  // 공급가액
+            { wch: 12 }   // 세액
+        ];
+        
+        XLSX.utils.book_append_sheet(wb, ws, '회계양식');
+        
+        // 파일 다운로드
+        const fileName = `회계양식_${yearMonth}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+        
+        showToast(`${fileName} 다운로드 완료!`);
+    };
+
     const renderCommissionView = async (selectedYearMonth = null) => {
         showLoader();
         
@@ -693,6 +787,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         `}
                     </div>
                     <div class="modal-footer">
+                        <button type="button" id="btn-export-excel" class="btn-primary" style="margin-right: auto;">📊 회계 엑셀 다운로드</button>
                         <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()">닫기</button>
                     </div>
                 </div>
@@ -718,6 +813,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (btnNextMonth && nextMonth) {
                     btnNextMonth.addEventListener('click', () => {
                         renderCommissionView(nextMonth);
+                    });
+                }
+                
+                const btnExportExcel = document.getElementById('btn-export-excel');
+                if (btnExportExcel) {
+                    btnExportExcel.addEventListener('click', () => {
+                        exportCommissionToExcel(currentYearMonth, companies, lastDay);
                     });
                 }
             }, 0);

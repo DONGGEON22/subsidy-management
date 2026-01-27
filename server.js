@@ -1150,7 +1150,7 @@ app.get('/api/commission', requireAuth, async (req, res) => {
         // 지급 완료된 근로자 조회 (회사 정보 포함)
         const { data: employees, error } = await supabase
             .from('employees')
-            .select('*, companies(name, commission)')
+            .select('*, companies(name, commission, business_number)')
             .eq('resigned', false)
             .order('name', { ascending: true });
         
@@ -1182,7 +1182,13 @@ app.get('/api/commission', requireAuth, async (req, res) => {
                         const paidDate = new Date(appliedDate);
                         if (isNaN(paidDate.getTime())) continue;
                         
-                        const yearMonth = `${paidDate.getFullYear()}-${String(paidDate.getMonth() + 1).padStart(2, '0')}`;
+                        const year = paidDate.getFullYear();
+                        const month = paidDate.getMonth() + 1;
+                        const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
+                        
+                        // 해당 월의 마지막 날 계산
+                        const lastDay = new Date(year, month, 0).getDate();
+                        const monthEndDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
                         
                         // 해당 월 데이터 초기화
                         if (!commissionData[yearMonth]) {
@@ -1193,11 +1199,12 @@ app.get('/api/commission', requireAuth, async (req, res) => {
                         if (!commissionData[yearMonth][emp.company_id]) {
                             commissionData[yearMonth][emp.company_id] = {
                                 기업명: companyName,
+                                사업자번호: emp.companies?.business_number || '',
                                 수수료율: commissionRate,
                                 총지급액: 0,
                                 수수료: 0,
                                 지급내역: [],
-                                월말일: `${yearMonth}-01`
+                                월말일: monthEndDate
                             };
                         }
                         
