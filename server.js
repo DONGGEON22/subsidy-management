@@ -23,8 +23,12 @@ app.use(cors({
     origin: true,
     credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' })); // JSON 크기 제한
 app.use(cookieParser());
+
+// 압축 미들웨어 (응답 속도 향상)
+const compression = require('compression');
+app.use(compression());
 
 // 인증 미들웨어 (JWT 기반)
 const requireAuth = (req, res, next) => {
@@ -43,8 +47,12 @@ const requireAuth = (req, res, next) => {
     }
 };
 
-// 정적 파일 제공 (로그인 페이지는 인증 없이 접근 가능)
-app.use(express.static('public'));
+// 정적 파일 제공 (캐싱 헤더 추가로 성능 향상)
+app.use(express.static('public', {
+    maxAge: '1d', // 1일 캐싱
+    etag: true,
+    lastModified: true
+}));
 
 // ===== 유틸리티 함수 =====
 function calculateDueDate(hireDate, round, isYouth = false) {
@@ -583,9 +591,10 @@ app.post('/api/employees', requireAuth, async (req, res) => {
         }
         
         // 같은 회사의 같은 입사년도 근로자가 있는지 확인하여 사업승인 정보 가져오기
+        // ⚠️ 채용자통보는 근로자별로 따로 관리 (동기화 안 함)
         const { data: existingEmployees } = await supabase
             .from('employees')
-            .select('business_applied_date, business_applied_complete, hiring_notify_date, hiring_notify_complete')
+            .select('business_applied_date, business_applied_complete')
             .eq('company_id', companyId)
             .eq('hire_year', hireYear)
             .limit(1);
@@ -595,9 +604,7 @@ app.post('/api/employees', requireAuth, async (req, res) => {
             const existing = existingEmployees[0];
             businessSyncData = {
                 business_applied_date: existing.business_applied_date,
-                business_applied_complete: existing.business_applied_complete,
-                hiring_notify_date: existing.hiring_notify_date,
-                hiring_notify_complete: existing.hiring_notify_complete
+                business_applied_complete: existing.business_applied_complete
             };
             console.log(`✅ ${hireYear}년 입사 기존 근로자의 사업승인 정보 적용`);
         }
@@ -727,13 +734,12 @@ app.put('/api/employees/:id', requireAuth, async (req, res) => {
         
         // 퇴사 처리가 아닌 경우에만 사업승인 동기화
         // 재직 중인 근로자만 동기화 대상에 포함
+        // ⚠️ 채용자통보는 근로자별로 따로 관리 (동기화 안 함)
         if (!dbData.resigned) {
-            // 사업승인 관련 필드가 있는 경우, 같은 회사의 같은 입사년도 근로자들 동기화
+            // 사업승인 관련 필드만 동기화 (채용자통보는 제외)
             const businessSyncFields = {
                 business_applied_date: dbData.business_applied_date,
-                business_applied_complete: dbData.business_applied_complete,
-                hiring_notify_date: dbData.hiring_notify_date,
-                hiring_notify_complete: dbData.hiring_notify_complete
+                business_applied_complete: dbData.business_applied_complete
             };
             
             // 같은 회사, 같은 입사년도(업데이트된 입사년도)의 다른 재직 근로자들 업데이트
