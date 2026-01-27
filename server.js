@@ -24,11 +24,12 @@ app.use(express.json());
 // 세션 설정
 app.use(session({
     secret: process.env.SESSION_SECRET || 'subsidy-mgmt-secret-key-2026-secure-random-string',
-    resave: false,
+    resave: true, // Serverless 환경을 위해 true로 변경
     saveUninitialized: false,
     cookie: {
-        secure: false, // HTTPS 사용 시 true로 변경
+        secure: process.env.NODE_ENV === 'production', // 프로덕션에서는 HTTPS 필수
         httpOnly: true,
+        sameSite: 'lax', // CSRF 보호
         maxAge: 24 * 60 * 60 * 1000 // 24시간
     }
 }));
