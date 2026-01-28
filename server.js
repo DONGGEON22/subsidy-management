@@ -1178,16 +1178,15 @@ app.delete('/api/memos/:id', requireAuth, async (req, res) => {
 // 수수료 정산 데이터
 app.get('/api/commission', requireAuth, async (req, res) => {
     try {
-        // 지급 완료된 근로자 조회 (회사 정보 포함)
+        // 모든 근로자 조회 (퇴사자 포함 - 지급받은 금액은 수수료 계산에 포함)
         const { data: employees, error } = await supabase
             .from('employees')
             .select('*, companies(name, commission, business_number)')
-            .eq('resigned', false)
             .order('name', { ascending: true });
         
         if (error) throw error;
         
-        console.log('📊 수수료 계산 시작, 총 근로자:', employees?.length || 0);
+        console.log('📊 수수료 계산 시작, 전체 근로자(퇴사자 포함):', employees?.length || 0);
         
         // 월별 정산 데이터 생성
         const commissionData = {};
@@ -1250,13 +1249,14 @@ app.get('/api/commission', requireAuth, async (req, res) => {
                         commissionData[yearMonth][emp.company_id].총지급액 += amount;
                         commissionData[yearMonth][emp.company_id].수수료 += commission;
                         commissionData[yearMonth][emp.company_id].지급내역.push({
-                            근로자: emp.name,
+                            근로자: emp.resigned ? `${emp.name} (퇴사)` : emp.name,
                             회차: `${round}차`,
                             금액: amount,
                             지급일: appliedDate
                         });
                         
-                        console.log(`  ✓ ${companyName} - ${emp.name} ${round}차: ${amount.toLocaleString()}원 × ${commissionRate}% = ${commission.toLocaleString()}원`);
+                        const employeeLabel = emp.resigned ? `${emp.name} (퇴사)` : emp.name;
+                        console.log(`  ✓ ${companyName} - ${employeeLabel} ${round}차: ${amount.toLocaleString()}원 × ${commissionRate}% = ${commission.toLocaleString()}원`);
                     } catch (e) {
                         console.error(`날짜 처리 오류 (${emp.name} ${round}차):`, e);
                     }
