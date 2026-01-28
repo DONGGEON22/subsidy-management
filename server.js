@@ -855,38 +855,38 @@ app.get('/api/dashboard', requireAuth, async (req, res) => {
                 }
             }
             
-            // 사업신청 기한 확인
+            // 사업신청 승인 대기 (신청했지만 승인 안 된 경우)
             if (emp.business_applied_date && !emp.business_applied_complete) {
                 const appliedDate = new Date(emp.business_applied_date);
                 const daysElapsed = Math.floor((today - appliedDate) / (1000 * 60 * 60 * 24));
-                if (daysElapsed >= 0) {
-                    upcoming.push({
-                        employeeId: emp.id,
-                        companyId: emp.company_id,
-                        companyName: emp.companies?.name,
-                        employeeName: emp.name,
-                        applicationRound: '사업신청',
-                        dueDate: emp.business_applied_date,
-                        type: 'business'
-                    });
-                }
+                
+                pending.push({
+                    employeeId: emp.id,
+                    companyId: emp.company_id,
+                    companyName: emp.companies?.name,
+                    employeeName: emp.name,
+                    applicationRound: '사업신청',
+                    appliedDate: emp.business_applied_date,
+                    daysElapsed,
+                    type: 'business'
+                });
             }
             
-            // 채용자통보 기한 확인
+            // 채용자통보 승인 대기 (통보했지만 완료 안 된 경우)
             if (emp.hiring_notify_date && !emp.hiring_notify_complete) {
                 const notifyDate = new Date(emp.hiring_notify_date);
                 const daysElapsed = Math.floor((today - notifyDate) / (1000 * 60 * 60 * 24));
-                if (daysElapsed >= 0) {
-                    upcoming.push({
-                        employeeId: emp.id,
-                        companyId: emp.company_id,
-                        companyName: emp.companies?.name,
-                        employeeName: emp.name,
-                        applicationRound: '채용자통보',
-                        dueDate: emp.hiring_notify_date,
-                        type: 'hiring'
-                    });
-                }
+                
+                pending.push({
+                    employeeId: emp.id,
+                    companyId: emp.company_id,
+                    companyName: emp.companies?.name,
+                    employeeName: emp.name,
+                    applicationRound: '채용자통보',
+                    appliedDate: emp.hiring_notify_date,
+                    daysElapsed,
+                    type: 'hiring'
+                });
             }
             
             // 1~4차 신청 기한 도래 확인
@@ -933,9 +933,9 @@ app.get('/api/dashboard', requireAuth, async (req, res) => {
             for (let round = 1; round <= 4; round++) {
                 const dueDate = emp[`youth${round}_due_date`];
                 const notifiedDate = emp[`youth${round}_notified_date`];
-                const isCompleted = emp[`youth${round}_notified_complete`];
+                const isCompleted = emp[`youth${round}_complete`];
                 
-                // 안내 기한 도래
+                // 안내 기한 도래 (신청해야 할 기한이 도래했는데 아직 안내 안 한 경우)
                 if (dueDate && !notifiedDate) {
                     const due = new Date(dueDate);
                     if (due <= today) {
@@ -951,7 +951,7 @@ app.get('/api/dashboard', requireAuth, async (req, res) => {
                     }
                 }
                 
-                // 안내 완료 대기
+                // 안내 완료 대기 (안내했지만 완료 안 된 경우)
                 if (notifiedDate && !isCompleted) {
                     const notified = new Date(notifiedDate);
                     const daysElapsed = Math.floor((today - notified) / (1000 * 60 * 60 * 24));
