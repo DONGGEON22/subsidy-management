@@ -33,3 +33,4 @@ WHERE table_name = 'memos'
 ORDER BY ordinal_position;
 
 
+

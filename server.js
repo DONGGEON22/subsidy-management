@@ -9,19 +9,46 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Supabase 초기화
-const SUPABASE_URL = 'https://knkffxwcsrkxjneffyzh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtua2ZmeHdjc3JreGpuZWZmeXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MzM1MjcsImV4cCI6MjA4NTAwOTUyN30.qNn5K02eo7dT_ToFEOS8oGKloKzSrCtxJsDM-2U_cVU';
+// ✅ 보안 개선: 환경변수에서 민감 정보 로드
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// 필수 환경변수 검증
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !JWT_SECRET) {
+    console.error('❌ 필수 환경변수가 설정되지 않았습니다!');
+    console.error('다음 환경변수를 .env 파일에 설정하세요:');
+    console.error('  - SUPABASE_URL');
+    console.error('  - SUPABASE_ANON_KEY');
+    console.error('  - JWT_SECRET');
+    process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// JWT 시크릿 키
-const JWT_SECRET = process.env.JWT_SECRET || 'subsidy-mgmt-jwt-secret-key-2026-very-secure-string';
+// ✅ 보안 개선: CORS 정책 엄격하게 설정
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : ['http://localhost:3001'];  // 개발 환경 기본값
 
-// 미들웨어
 app.use(cors({
-    origin: true,
-    credentials: true
+    origin: function(origin, callback) {
+        // origin이 undefined인 경우 (same-origin 요청) 허용
+        if (!origin) return callback(null, true);
+        
+        // 허용된 origin 목록에 있는지 확인
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.warn(`⚠️ CORS 차단: ${origin}`);
+            callback(new Error('CORS 정책에 의해 차단되었습니다.'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Set-Cookie'],
+    maxAge: 86400  // 24시간 preflight 캐싱
 }));
 app.use(express.json({ limit: '1mb' })); // JSON 크기 제한
 app.use(cookieParser());
@@ -260,22 +287,70 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
         // 새 비밀번호 암호화
         const newHashedPassword = await bcrypt.hash(newPassword, 10);
 
-        console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('⚠️  관리자 비밀번호가 변경되었습니다!');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('새 비밀번호 해시값을 server.js 파일에 업데이트하세요:');
-        console.log('');
-        console.log('const ADMIN_PASSWORD_HASH = \'' + newHashedPassword + '\';');
-        console.log('');
-        console.log('또는 .env 파일에 추가하세요:');
-        console.log('ADMIN_PASSWORD_HASH=' + newHashedPassword);
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-        res.json({
-            success: true,
-            message: '비밀번호가 변경되었습니다. 서버 로그를 확인하여 새 해시값을 저장하세요.',
-            newHash: newHashedPassword
-        });
+        // ✅ 보안 개선: .env 파일 자동 업데이트 시도
+        const fs = require('fs');
+        const path = require('path');
+        const envPath = path.join(__dirname, '.env');
+        
+        try {
+            if (fs.existsSync(envPath)) {
+                let envContent = fs.readFileSync(envPath, 'utf8');
+                
+                // ADMIN_PASSWORD_HASH 업데이트
+                if (envContent.includes('ADMIN_PASSWORD_HASH=')) {
+                    envContent = envContent.replace(
+                        /ADMIN_PASSWORD_HASH=.*/,
+                        `ADMIN_PASSWORD_HASH=${newHashedPassword}`
+                    );
+                } else {
+                    envContent += `\nADMIN_PASSWORD_HASH=${newHashedPassword}\n`;
+                }
+                
+                fs.writeFileSync(envPath, envContent, 'utf8');
+                
+                console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('✅ 관리자 비밀번호가 변경되었습니다!');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('✅ .env 파일이 자동으로 업데이트되었습니다.');
+                console.log('⚠️  서버를 재시작해야 변경사항이 적용됩니다.');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+                
+                res.json({
+                    success: true,
+                    message: '비밀번호가 변경되었습니다. 서버를 재시작해주세요.',
+                    requireRestart: true
+                });
+            } else {
+                // .env 파일이 없는 경우 - 서버 로그에만 출력 (응답에는 포함하지 않음)
+                console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('⚠️  관리자 비밀번호가 변경되었습니다!');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('⚠️  .env 파일을 찾을 수 없습니다.');
+                console.log('다음 내용으로 .env 파일을 생성하세요:');
+                console.log('');
+                console.log('ADMIN_PASSWORD_HASH=' + newHashedPassword);
+                console.log('');
+                console.log('⚠️  보안상 해시값은 서버 콘솔에서만 확인할 수 있습니다.');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+                
+                res.json({
+                    success: true,
+                    message: '비밀번호가 변경되었습니다. 서버 콘솔을 확인하여 .env 파일을 업데이트하세요.',
+                    requireManualUpdate: true
+                });
+            }
+        } catch (fsError) {
+            // 파일 시스템 오류 시 - 로그에만 출력
+            console.error('⚠️  .env 파일 자동 업데이트 실패:', fsError.message);
+            console.log('\n새 비밀번호 해시 (서버 로그에서만 확인):');
+            console.log('ADMIN_PASSWORD_HASH=' + newHashedPassword + '\n');
+            
+            res.json({
+                success: true,
+                message: '비밀번호가 변경되었습니다. 서버 콘솔을 확인하여 .env 파일을 수동으로 업데이트하세요.',
+                requireManualUpdate: true
+            });
+        }
     } catch (error) {
         console.error('비밀번호 변경 오류:', error);
         res.status(500).json({ success: false, error: '서버 오류가 발생했습니다.' });

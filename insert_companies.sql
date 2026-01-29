@@ -29,3 +29,4 @@ SELECT COUNT(*) as total_companies FROM companies;
 SELECT name, representative, commission FROM companies ORDER BY id DESC LIMIT 21;
 
 
+

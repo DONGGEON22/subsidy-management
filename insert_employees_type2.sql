@@ -99,3 +99,4 @@ GROUP BY business_type
 ORDER BY business_type;
 
 
+
