@@ -5,6 +5,9 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { createClient } = require('@supabase/supabase-js');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,6 +28,57 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !JWT_SECRET) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ✅ 보안 개선: Helmet으로 보안 헤더 적용
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],  // 인라인 스타일 허용
+            scriptSrc: ["'self'", "https://cdn.sheetjs.com", "'unsafe-inline'"],  // SheetJS CDN 허용
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"]
+        }
+    },
+    hsts: {
+        maxAge: 31536000,  // 1년
+        includeSubDomains: true,
+        preload: true
+    },
+    noSniff: true,
+    xssFilter: true,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+}));
+
+// ✅ 보안 개선: 레이트 리미팅 적용
+// 로그인 시도 제한 (15분에 5회)
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,  // 15분
+    max: 5,  // 최대 5회 시도
+    message: { 
+        success: false, 
+        error: '로그인 시도 횟수를 초과했습니다. 15분 후 다시 시도하세요.' 
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: false  // 성공한 요청도 카운트
+});
+
+// 일반 API 제한 (1분에 100회)
+const apiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000,  // 1분
+    max: 100,  // 최대 100회
+    message: { 
+        success: false, 
+        error: 'API 요청 횟수를 초과했습니다. 잠시 후 다시 시도하세요.' 
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
 
 // ✅ 보안 개선: CORS 정책 엄격하게 설정
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
@@ -56,6 +110,9 @@ app.use(cookieParser());
 // 압축 미들웨어 (응답 속도 향상)
 const compression = require('compression');
 app.use(compression());
+
+// ✅ 보안 개선: API 엔드포인트에 레이트 리미팅 적용
+app.use('/api/', apiLimiter);
 
 // 인증 미들웨어 (JWT 기반)
 const requireAuth = (req, res, next) => {
@@ -123,8 +180,8 @@ const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '$2b$10$LjtsxnUJpQ/G8FoHPaxTB.c5UmkJ5E8NrcH7BMOzV0yb/5oYkOF12';
 
 // ===== 인증 API =====
-// 로그인
-app.post('/api/auth/login', async (req, res) => {
+// 로그인 (레이트 리미팅 적용)
+app.post('/api/auth/login', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -168,12 +225,13 @@ app.post('/api/auth/login', async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        // 쿠키에 토큰 저장
+        // ✅ 보안 개선: 쿠키 보안 설정 강화
         res.cookie('auth_token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 24 * 60 * 60 * 1000 // 24시간
+            httpOnly: true,  // XSS 공격 방지
+            secure: true,  // HTTPS 필수 (개발 환경에서는 localhost에서 작동)
+            sameSite: 'strict',  // CSRF 공격 완전 차단
+            maxAge: 24 * 60 * 60 * 1000,  // 24시간
+            path: '/'
         });
 
         console.log(`✅ 관리자 로그인 성공: ${username}`);
@@ -206,11 +264,12 @@ app.post('/api/auth/logout', (req, res) => {
         }
     }
     
-    // 쿠키 삭제
+    // ✅ 보안 개선: 쿠키 삭제 (로그인과 동일한 설정 사용)
     res.clearCookie('auth_token', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax'
+        secure: true,
+        sameSite: 'strict',
+        path: '/'
     });
     
     console.log(`✅ 로그아웃: ${username}`);
@@ -246,6 +305,38 @@ app.get('/api/auth/check', (req, res) => {
     }
 });
 
+// ✅ 보안 개선: 비밀번호 검증 함수
+function validatePassword(password) {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    const errors = [];
+    
+    if (password.length < minLength) {
+        errors.push(`비밀번호는 최소 ${minLength}자 이상이어야 합니다.`);
+    }
+    if (!hasUpperCase) {
+        errors.push('대문자를 최소 1개 포함해야 합니다.');
+    }
+    if (!hasLowerCase) {
+        errors.push('소문자를 최소 1개 포함해야 합니다.');
+    }
+    if (!hasNumber) {
+        errors.push('숫자를 최소 1개 포함해야 합니다.');
+    }
+    if (!hasSpecialChar) {
+        errors.push('특수문자를 최소 1개 포함해야 합니다.');
+    }
+    
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+}
+
 // 비밀번호 변경 (관리자만)
 app.post('/api/auth/change-password', requireAuth, async (req, res) => {
     try {
@@ -259,10 +350,13 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
             });
         }
 
-        if (newPassword.length < 8) {
-            return res.status(400).json({ 
-                success: false, 
-                error: '새 비밀번호는 8자 이상이어야 합니다.' 
+        // ✅ 보안 개선: 비밀번호 복잡도 검증
+        const validation = validatePassword(newPassword);
+        if (!validation.isValid) {
+            return res.status(400).json({
+                success: false,
+                error: '비밀번호 요구사항을 충족하지 않습니다.',
+                details: validation.errors
             });
         }
 
@@ -395,8 +489,37 @@ app.get('/api/companies', requireAuth, async (req, res) => {
     }
 });
 
+// ✅ 보안 개선: 입력 검증 미들웨어
+const validateCompany = [
+    body('name')
+        .trim()
+        .notEmpty().withMessage('기업명은 필수입니다')
+        .isLength({ min: 1, max: 100 }).withMessage('기업명은 1-100자여야 합니다')
+        .matches(/^[a-zA-Z0-9가-힣\s\-_()&.]+$/).withMessage('기업명에 허용되지 않은 문자가 포함되어 있습니다'),
+    body('businessNumber')
+        .optional({ nullable: true })
+        .trim()
+        .matches(/^\d{3}-\d{2}-\d{5}$/).withMessage('사업자번호 형식이 올바르지 않습니다 (예: 123-45-67890)'),
+    body('email')
+        .optional({ nullable: true })
+        .trim()
+        .isEmail().withMessage('올바른 이메일 형식이 아닙니다'),
+    body('commission')
+        .optional({ nullable: true })
+        .isFloat({ min: 0, max: 100 }).withMessage('수수료는 0-100 사이여야 합니다')
+];
+
 // 기업 추가
-app.post('/api/companies', requireAuth, async (req, res) => {
+app.post('/api/companies', requireAuth, validateCompany, async (req, res) => {
+    // 입력 검증 결과 확인
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ 
+            success: false, 
+            error: errors.array()[0].msg,
+            details: errors.array()
+        });
+    }
     try {
         const { data, error } = await supabase
             .from('companies')
