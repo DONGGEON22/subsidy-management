@@ -38,3 +38,7 @@ playwright-report/
 
 # Vercel
 .vercel
+
+# Backups (민감 정보 포함!)
+backups/
+backup-*.json
