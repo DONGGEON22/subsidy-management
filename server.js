@@ -228,8 +228,8 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
         // ✅ 보안 개선: 쿠키 보안 설정 강화
         res.cookie('auth_token', token, {
             httpOnly: true,  // XSS 공격 방지
-            secure: true,  // HTTPS 필수 (개발 환경에서는 localhost에서 작동)
-            sameSite: 'strict',  // CSRF 공격 완전 차단
+            secure: process.env.NODE_ENV === 'production',  // 운영: HTTPS 필수, 개발: HTTP 허용
+            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',  // 운영: strict, 개발: lax
             maxAge: 24 * 60 * 60 * 1000,  // 24시간
             path: '/'
         });
@@ -267,8 +267,8 @@ app.post('/api/auth/logout', (req, res) => {
     // ✅ 보안 개선: 쿠키 삭제 (로그인과 동일한 설정 사용)
     res.clearCookie('auth_token', {
         httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
         path: '/'
     });
     
