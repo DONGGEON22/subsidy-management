@@ -1406,6 +1406,7 @@ app.get('/api/commission', requireAuth, async (req, res) => {
         if (error) throw error;
         
         console.log('📊 수수료 계산 시작, 전체 근로자(퇴사자 포함):', employees?.length || 0);
+        console.log('📅 현재 날짜:', new Date().toISOString());
         
         // 월별 정산 데이터 생성
         const commissionData = {};
@@ -1425,15 +1426,25 @@ app.get('/api/commission', requireAuth, async (req, res) => {
                 const isPaid = emp[`round${round}_paid`];
                 const paidDate = emp[`round${round}_paid_date`]; // 지급완료일 = 승인 버튼 누른 날
                 
+                // 디버깅: 2월 데이터 확인
+                if (isPaid && paidDate) {
+                    console.log(`🔍 [${companyName}] ${emp.name} ${round}차 - 지급완료: ${isPaid}, 지급일: ${paidDate}`);
+                }
+                
                 // 지급확인이 되고, 지급완료일(승인일)이 있는 경우에만 처리
                 if (isPaid && paidDate) {
                     try {
                         const dateObj = new Date(paidDate);
-                        if (isNaN(dateObj.getTime())) continue;
+                        if (isNaN(dateObj.getTime())) {
+                            console.warn(`⚠️ 날짜 파싱 실패: ${paidDate}`);
+                            continue;
+                        }
                         
                         const year = dateObj.getFullYear();
                         const month = dateObj.getMonth() + 1;
                         const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
+                        
+                        console.log(`  → 집계 월: ${yearMonth} (년: ${year}, 월: ${month})`);
                         
                         // 해당 월의 마지막 날 계산
                         const lastDay = new Date(year, month, 0).getDate();

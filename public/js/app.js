@@ -640,7 +640,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="modal-content" style="max-width: 600px;">
                         <div class="modal-header">
                             <h2>💰 수수료 정산</h2>
-                            <span class="close-btn" onclick="this.closest('.modal').remove()">&times;</span>
+                            <span class="close-btn">&times;</span>
                         </div>
                         <div class="modal-body">
                             <div style="text-align: center; padding: 40px 20px;">
@@ -654,11 +654,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()">닫기</button>
+                            <button type="button" class="btn-secondary btn-close-modal">닫기</button>
                         </div>
                     </div>
                 `;
                 document.body.appendChild(modal);
+                
+                // X 버튼과 닫기 버튼 이벤트
+                const closeBtn = modal.querySelector('.close-btn');
+                const closeBtnModal = modal.querySelector('.btn-close-modal');
+                if (closeBtn) closeBtn.addEventListener('click', () => modal.remove());
+                if (closeBtnModal) closeBtnModal.addEventListener('click', () => modal.remove());
+                
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) modal.remove();
                 });
@@ -697,7 +704,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="modal-content" style="max-width: 1200px; max-height: 90vh;">
                     <div class="modal-header">
                         <h2>💰 수수료 정산 - ${currentYearMonth}</h2>
-                        <span class="close-btn" onclick="this.closest('.modal').remove()">&times;</span>
+                        <span class="close-btn">&times;</span>
                     </div>
                     <div class="modal-body">
                         <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 24px; padding: 16px; background: var(--background-gray); border-radius: var(--radius-md);">
@@ -801,12 +808,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="modal-footer">
                         <button type="button" id="btn-export-excel" class="btn-primary" style="margin-right: auto;">📊 회계 엑셀 다운로드</button>
-                        <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()">닫기</button>
+                        <button type="button" class="btn-secondary btn-close-modal">닫기</button>
                     </div>
                 </div>
             `;
             
             document.body.appendChild(modal);
+            
+            // X 버튼과 닫기 버튼 이벤트
+            const closeBtn = modal.querySelector('.close-btn');
+            const closeBtnModal = modal.querySelector('.btn-close-modal');
+            if (closeBtn) closeBtn.addEventListener('click', () => modal.remove());
+            if (closeBtnModal) closeBtnModal.addEventListener('click', () => modal.remove());
             
             // 모달 배경 클릭 시 닫기
             modal.addEventListener('click', (e) => {
@@ -1258,6 +1271,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const autoDueDate = employee.입사일 ? calculateDueDate(employee.입사일, round) : '';
                     const dueDate = formatDate(employee[`${round}차 신청 예정일`]) || autoDueDate;
                     const appliedDate = formatDate(employee[`${round}차 신청일`]);
+                    const paidDate = formatDate(employee[`${round}차 지급일`]);
                 
                 return `
                 <div class="payment-row">
@@ -1289,6 +1303,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="date-input-wrapper">
                             <input type="date" name="${round}차 신청일" id="date-${round}차-신청일" value="${appliedDate}" class="form-control">
                             <button type="button" class="btn-today" data-target="date-${round}차-신청일">오늘</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>${round}차 지급일 <span style="font-size: 12px; color: #E91E63; font-weight: 600;">★ 수수료 정산 기준일</span></label>
+                        <div class="date-input-wrapper">
+                            <input type="date" name="${round}차 지급일" id="date-${round}차-지급일" value="${paidDate}" class="form-control">
+                            <button type="button" class="btn-today" data-target="date-${round}차-지급일">오늘</button>
                         </div>
                         <div class="checkbox-group">
                             <input type="checkbox" name="${round}차 지급확인" ${isPaid ? 'checked' : ''}>
@@ -2000,7 +2021,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="modal-content" style="max-width: 500px;">
                             <div class="modal-header">
                                 <h2>📧 ${companyData.name} 로그인 정보</h2>
-                                <span class="close-btn" onclick="this.closest('.modal').remove()">&times;</span>
+                                <span class="close-btn">&times;</span>
                             </div>
                             <div class="modal-body">
                                 <div style="padding: 16px; background: var(--background-gray); border-radius: var(--radius-md); margin-bottom: 16px;">
@@ -2038,11 +2059,17 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()">닫기</button>
+                                <button type="button" class="btn-secondary btn-close-modal">닫기</button>
                             </div>
                         </div>
                     `;
                     document.body.appendChild(loginModal);
+                    
+                    // X 버튼과 닫기 버튼 이벤트
+                    const closeBtn = loginModal.querySelector('.close-btn');
+                    const closeBtnModal = loginModal.querySelector('.btn-close-modal');
+                    if (closeBtn) closeBtn.addEventListener('click', () => loginModal.remove());
+                    if (closeBtnModal) closeBtnModal.addEventListener('click', () => loginModal.remove());
                     
                     loginModal.addEventListener('click', (e) => {
                         if (e.target === loginModal) {
