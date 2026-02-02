@@ -1423,16 +1423,16 @@ app.get('/api/commission', requireAuth, async (req, res) => {
             // 각 차수별로 처리
             for (let round = 1; round <= 4; round++) {
                 const isPaid = emp[`round${round}_paid`];
-                const appliedDate = emp[`round${round}_applied_date`]; // 신청일 = 승인 버튼 누른 날
+                const paidDate = emp[`round${round}_paid_date`]; // 지급완료일 = 승인 버튼 누른 날
                 
-                // 지급확인이 되고, 신청일(승인일)이 있는 경우에만 처리
-                if (isPaid && appliedDate) {
+                // 지급확인이 되고, 지급완료일(승인일)이 있는 경우에만 처리
+                if (isPaid && paidDate) {
                     try {
-                        const paidDate = new Date(appliedDate);
-                        if (isNaN(paidDate.getTime())) continue;
+                        const dateObj = new Date(paidDate);
+                        if (isNaN(dateObj.getTime())) continue;
                         
-                        const year = paidDate.getFullYear();
-                        const month = paidDate.getMonth() + 1;
+                        const year = dateObj.getFullYear();
+                        const month = dateObj.getMonth() + 1;
                         const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
                         
                         // 해당 월의 마지막 날 계산
@@ -1471,7 +1471,7 @@ app.get('/api/commission', requireAuth, async (req, res) => {
                             근로자: emp.resigned ? `${emp.name} (퇴사)` : emp.name,
                             회차: `${round}차`,
                             금액: amount,
-                            지급일: appliedDate
+                            지급일: paidDate
                         });
                         
                         const employeeLabel = emp.resigned ? `${emp.name} (퇴사)` : emp.name;
