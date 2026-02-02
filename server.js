@@ -497,16 +497,37 @@ const validateCompany = [
         .isLength({ min: 1, max: 100 }).withMessage('기업명은 1-100자여야 합니다')
         .matches(/^[a-zA-Z0-9가-힣\s\-_()&.]+$/).withMessage('기업명에 허용되지 않은 문자가 포함되어 있습니다'),
     body('businessNumber')
-        .optional({ nullable: true })
+        .optional({ checkFalsy: true })  // 빈 문자열도 허용
         .trim()
-        .matches(/^\d{3}-\d{2}-\d{5}$/).withMessage('사업자번호 형식이 올바르지 않습니다 (예: 123-45-67890)'),
+        .custom((value) => {
+            // 값이 있을 때만 형식 검증
+            if (value && !/^\d{3}-\d{2}-\d{5}$/.test(value)) {
+                throw new Error('사업자번호 형식이 올바르지 않습니다 (예: 123-45-67890)');
+            }
+            return true;
+        }),
     body('email')
-        .optional({ nullable: true })
+        .optional({ checkFalsy: true })  // 빈 문자열도 허용
         .trim()
-        .isEmail().withMessage('올바른 이메일 형식이 아닙니다'),
+        .custom((value) => {
+            // 값이 있을 때만 이메일 검증
+            if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                throw new Error('올바른 이메일 형식이 아닙니다');
+            }
+            return true;
+        }),
     body('commission')
-        .optional({ nullable: true })
-        .isFloat({ min: 0, max: 100 }).withMessage('수수료는 0-100 사이여야 합니다')
+        .optional({ checkFalsy: true })  // 빈 문자열도 허용
+        .custom((value) => {
+            // 값이 있을 때만 숫자 검증
+            if (value !== '' && value !== null && value !== undefined) {
+                const num = parseFloat(value);
+                if (isNaN(num) || num < 0 || num > 100) {
+                    throw new Error('수수료는 0-100 사이여야 합니다');
+                }
+            }
+            return true;
+        })
 ];
 
 // 기업 추가
