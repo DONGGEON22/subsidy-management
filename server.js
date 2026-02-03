@@ -495,7 +495,14 @@ const validateCompany = [
         .trim()
         .notEmpty().withMessage('기업명은 필수입니다')
         .isLength({ min: 1, max: 100 }).withMessage('기업명은 1-100자여야 합니다')
-        .matches(/^[a-zA-Z0-9가-힣\s\-_()&.]+$/).withMessage('기업명에 허용되지 않은 문자가 포함되어 있습니다'),
+        .custom((value) => {
+            // 위험한 문자만 차단 (SQL Injection, XSS 방지)
+            const dangerousChars = /[<>'"`;\\]/;
+            if (dangerousChars.test(value)) {
+                throw new Error('기업명에 특수문자 < > \' " ` ; \\ 는 사용할 수 없습니다');
+            }
+            return true;
+        }),
     body('businessNumber')
         .optional({ checkFalsy: true })  // 빈 문자열도 허용
         .trim()

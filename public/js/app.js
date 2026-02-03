@@ -18,14 +18,17 @@ const api = {
         try {
             const response = await fetch(`/api/${endpoint}`, options);
             
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
+            // 에러 응답도 JSON으로 파싱 시도
             const result = await response.json();
             
+            if (!response.ok) {
+                // 서버에서 보낸 에러 메시지 사용
+                const errorMessage = result.error || result.message || `HTTP ${response.status} 오류`;
+                throw new Error(errorMessage);
+            }
+            
             if (result.success === false) {
-                throw new Error(result.message || '알 수 없는 오류');
+                throw new Error(result.error || result.message || '알 수 없는 오류');
             }
             
             return result;
