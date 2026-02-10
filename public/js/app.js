@@ -1300,7 +1300,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="form-group">
                         <label>신청 대상 기간</label>
                         <div style="padding: 10px 12px; background: #F0F7FF; border: 1px solid #90CAF9; border-radius: 6px; font-size: 14px; font-weight: 600; color: #1976D2;">
-                            ${employee.입사일 ? formatDate(employee.입사일) : '-'} ~ ${dueDate || '-'}
+                            ${(() => {
+                                if (!employee.입사일) return '-';
+                                const hireDate = new Date(employee.입사일);
+                                // 이전 차수의 종료일 다음날부터
+                                const prevMonths = round === 1 ? 0 : SCHEDULE_MONTHS[round - 1];
+                                const startDate = new Date(hireDate);
+                                startDate.setMonth(startDate.getMonth() + prevMonths);
+                                
+                                // 현재 차수의 마지막 날 (신청예정일 전날)
+                                const endDate = new Date(hireDate);
+                                endDate.setMonth(endDate.getMonth() + SCHEDULE_MONTHS[round]);
+                                endDate.setDate(endDate.getDate() - 1);
+                                
+                                return `${formatDate(startDate.toISOString().split('T')[0])} ~ ${formatDate(endDate.toISOString().split('T')[0])}`;
+                            })()}
                         </div>
                         <div style="margin-top: 6px; font-size: 11px; color: var(--text-tertiary);">
                             ※ 신청 예정일: ${dueDate || '-'} (입사일+${SCHEDULE_MONTHS[round]}개월)
@@ -1389,7 +1403,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="form-group">
                         <label>안내 대상 기간</label>
                         <div style="padding: 10px 12px; background: #F3E5F5; border: 1px solid #CE93D8; border-radius: 6px; font-size: 14px; font-weight: 600; color: #7B1FA2;">
-                            ${employee.입사일 ? formatDate(employee.입사일) : '-'} ~ ${dueDate || '-'}
+                            ${(() => {
+                                if (!employee.입사일) return '-';
+                                const hireDate = new Date(employee.입사일);
+                                // 이전 차수의 종료일 다음날부터
+                                const prevMonths = round === 1 ? 0 : YOUTH_SCHEDULE_MONTHS[round - 1];
+                                const startDate = new Date(hireDate);
+                                startDate.setMonth(startDate.getMonth() + prevMonths);
+                                
+                                // 현재 차수의 마지막 날 (안내예정일 전날)
+                                const endDate = new Date(hireDate);
+                                endDate.setMonth(endDate.getMonth() + YOUTH_SCHEDULE_MONTHS[round]);
+                                endDate.setDate(endDate.getDate() - 1);
+                                
+                                return `${formatDate(startDate.toISOString().split('T')[0])} ~ ${formatDate(endDate.toISOString().split('T')[0])}`;
+                            })()}
                         </div>
                         <div style="margin-top: 6px; font-size: 11px; color: var(--text-tertiary);">
                             ※ 안내 예정일: ${dueDate || '-'} (입사일+${YOUTH_SCHEDULE_MONTHS[round]}개월)
