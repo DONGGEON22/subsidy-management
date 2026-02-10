@@ -841,10 +841,12 @@ app.post('/api/employees', requireAuth, async (req, res) => {
         const round3DueDate = calculateDueDate(hireDate, 3, false);
         const round4DueDate = hireYear <= 2024 ? calculateDueDate(hireDate, 4, false) : null;
         
-        const youth1DueDate = calculateDueDate(hireDate, 1, true);
-        const youth2DueDate = calculateDueDate(hireDate, 2, true);
-        const youth3DueDate = calculateDueDate(hireDate, 3, true);
-        const youth4DueDate = calculateDueDate(hireDate, 4, true);
+        // 청년고용 안내는 2025년 이후 입사 + 유형2만 해당
+        const isYouthEligible = hireYear >= 2025 && businessType === '유형2';
+        const youth1DueDate = isYouthEligible ? calculateDueDate(hireDate, 1, true) : null;
+        const youth2DueDate = isYouthEligible ? calculateDueDate(hireDate, 2, true) : null;
+        const youth3DueDate = isYouthEligible ? calculateDueDate(hireDate, 3, true) : null;
+        const youth4DueDate = isYouthEligible ? calculateDueDate(hireDate, 4, true) : null;
         
         const { data, error } = await supabase
             .from('employees')
