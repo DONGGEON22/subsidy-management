@@ -1298,8 +1298,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                inputmode="numeric">
                     </div>
                     <div class="form-group">
-                        <label>${round}차 신청 예정일 <span style="font-size: 12px; color: var(--text-tertiary); font-weight: 400;">(입사일+${SCHEDULE_MONTHS[round]}개월)</span></label>
-                        <input type="date" name="${round}차 신청 예정일" value="${dueDate}" class="form-control" readonly style="background-color: var(--background-gray); cursor: not-allowed;">
+                        <label>신청 대상 기간</label>
+                        <div style="padding: 10px 12px; background: #F0F7FF; border: 1px solid #90CAF9; border-radius: 6px; font-size: 14px; font-weight: 600; color: #1976D2;">
+                            ${employee.입사일 ? formatDate(employee.입사일) : '-'} ~ ${dueDate || '-'}
+                        </div>
+                        <div style="margin-top: 6px; font-size: 11px; color: var(--text-tertiary);">
+                            ※ 신청 예정일: ${dueDate || '-'} (입사일+${SCHEDULE_MONTHS[round]}개월)
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>${round}차 신청일</label>
@@ -1382,8 +1387,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                inputmode="numeric">
                     </div>
                     <div class="form-group">
-                        <label>청년${round}차 안내 예정일 <span style="font-size: 12px; color: var(--text-tertiary); font-weight: 400;">(입사일+${YOUTH_SCHEDULE_MONTHS[round]}개월)</span></label>
-                        <input type="date" name="청년${round}차 안내 예정일" value="${dueDate}" class="form-control" readonly style="background-color: var(--background-gray); cursor: not-allowed;">
+                        <label>안내 대상 기간</label>
+                        <div style="padding: 10px 12px; background: #F3E5F5; border: 1px solid #CE93D8; border-radius: 6px; font-size: 14px; font-weight: 600; color: #7B1FA2;">
+                            ${employee.입사일 ? formatDate(employee.입사일) : '-'} ~ ${dueDate || '-'}
+                        </div>
+                        <div style="margin-top: 6px; font-size: 11px; color: var(--text-tertiary);">
+                            ※ 안내 예정일: ${dueDate || '-'} (입사일+${YOUTH_SCHEDULE_MONTHS[round]}개월)
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>청년${round}차 안내일</label>
