@@ -214,11 +214,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isCompleted = employee[`청년${round}차 안내완료`];
                 
                 if (isCompleted) {
-                    totalReceived += amount;
+                    // 청년 지원금은 회사 수취지원금에 포함하지 않음
                     youthSubsidyReceived += amount;
                     details.push({ round, amount, status: '안내완료', type: '청년' });
                 } else {
-                    totalExpected += amount;
+                    // 청년 지원금은 회사 수취지원금에 포함하지 않음
                     youthSubsidyExpected += amount;
                     details.push({ round, amount, status: '미안내', type: '청년' });
                 }
@@ -226,13 +226,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         return { 
-            totalReceived, 
-            totalExpected, 
-            total: totalReceived + totalExpected, 
+            totalReceived,  // 회사가 받은 지원금만 포함
+            totalExpected,  // 회사가 받을 지원금만 포함
+            total: totalReceived + totalExpected,  // 회사 지원금 총액
             companySubsidyReceived,
             companySubsidyExpected,
-            youthSubsidyReceived,
-            youthSubsidyExpected,
+            youthSubsidyReceived,  // 청년이 받은 지원금 (별도 관리)
+            youthSubsidyExpected,  // 청년이 받을 지원금 (별도 관리)
             details,
             hireYear
         };
