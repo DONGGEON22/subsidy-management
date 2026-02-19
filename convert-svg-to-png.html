@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SVG to PNG Converter</title>
+</head>
+<body>
+    <h2>SVG를 PNG로 변환</h2>
+    <img id="svgImage" src="public/images/money-logo.svg" style="display:none;">
+    <canvas id="canvas" width="200" height="200"></canvas>
+    <br>
+    <button onclick="downloadPNG()">PNG 다운로드</button>
+    
+    <script>
+        const img = document.getElementById('svgImage');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        img.onload = function() {
+            ctx.drawImage(img, 0, 0, 200, 200);
+        };
+        
+        function downloadPNG() {
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'money-logo.png';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+    </script>
+</body>
+</html>
+

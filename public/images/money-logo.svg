@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- 배경 원 -->
+  <circle cx="100" cy="100" r="95" fill="#4CAF50" opacity="0.1"/>
+  <circle cx="100" cy="100" r="85" fill="#4CAF50" opacity="0.2"/>
+  
+  <!-- 동전 스택 -->
+  <!-- 맨 아래 동전 -->
+  <ellipse cx="100" cy="140" rx="45" ry="12" fill="#FFD700"/>
+  <ellipse cx="100" cy="140" rx="45" ry="12" fill="#FFA500" opacity="0.3"/>
+  
+  <!-- 중간 동전 -->
+  <ellipse cx="100" cy="125" rx="45" ry="12" fill="#FFD700"/>
+  <rect x="55" y="125" width="90" height="15" fill="#FFD700"/>
+  <ellipse cx="100" cy="125" rx="45" ry="12" fill="#FFA500" opacity="0.3"/>
+  
+  <!-- 위 동전 -->
+  <ellipse cx="100" cy="110" rx="45" ry="12" fill="#FFD700"/>
+  <rect x="55" y="110" width="90" height="15" fill="#FFD700"/>
+  <ellipse cx="100" cy="110" rx="45" ry="12" fill="#FFA500" opacity="0.3"/>
+  
+  <!-- 맨 위 동전 (메인) -->
+  <ellipse cx="100" cy="95" rx="45" ry="12" fill="#FFD700"/>
+  <rect x="55" y="95" width="90" height="15" fill="#FFD700"/>
+  <ellipse cx="100" cy="95" rx="45" ry="12" fill="#FFA500" opacity="0.3"/>
+  
+  <!-- 원화 기호 -->
+  <circle cx="100" cy="75" r="35" fill="#4CAF50"/>
+  <circle cx="100" cy="75" r="32" fill="white"/>
+  <text x="100" y="90" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="#4CAF50" text-anchor="middle">₩</text>
+  
+  <!-- 반짝임 효과 -->
+  <circle cx="70" cy="60" r="3" fill="white" opacity="0.8"/>
+  <circle cx="130" cy="65" r="2" fill="white" opacity="0.8"/>
+  <circle cx="85" cy="50" r="2.5" fill="white" opacity="0.6"/>
+</svg>
+

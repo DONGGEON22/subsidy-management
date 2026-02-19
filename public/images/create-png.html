@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>돈 아이콘 생성기</title>
+</head>
+<body style="padding: 20px; font-family: Arial;">
+    <h2>돈 아이콘 PNG 생성</h2>
+    <canvas id="canvas" width="200" height="200" style="border: 1px solid #ccc;"></canvas>
+    <br><br>
+    <button onclick="downloadPNG()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">PNG 다운로드 (money-logo.png)</button>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 배경을 투명하게
+        ctx.clearRect(0, 0, 200, 200);
+        
+        // 배경 원들
+        ctx.fillStyle = 'rgba(76, 175, 80, 0.1)';
+        ctx.beginPath();
+        ctx.arc(100, 100, 95, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = 'rgba(76, 175, 80, 0.2)';
+        ctx.beginPath();
+        ctx.arc(100, 100, 85, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 동전 스택 그리기
+        function drawCoin(y, isTop) {
+            // 동전 옆면
+            if (!isTop) {
+                ctx.fillStyle = '#FFD700';
+                ctx.fillRect(55, y, 90, 15);
+            }
+            
+            // 동전 윗면 (타원)
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.ellipse(100, y, 45, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 그림자 효과
+            ctx.fillStyle = 'rgba(255, 165, 0, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(100, y, 45, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // 동전들 그리기 (아래에서 위로)
+        drawCoin(140, true);
+        drawCoin(125, false);
+        drawCoin(110, false);
+        drawCoin(95, false);
+        
+        // 메인 원화 기호 원
+        ctx.fillStyle = '#4CAF50';
+        ctx.beginPath();
+        ctx.arc(100, 75, 35, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(100, 75, 32, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 원화 기호
+        ctx.fillStyle = '#4CAF50';
+        ctx.font = 'bold 40px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('₩', 100, 75);
+        
+        // 반짝임 효과
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.beginPath();
+        ctx.arc(70, 60, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.beginPath();
+        ctx.arc(130, 65, 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.beginPath();
+        ctx.arc(85, 50, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        function downloadPNG() {
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'money-logo.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alert('money-logo.png 다운로드 완료!\n\n다운로드된 파일을 public/images/ 폴더에 넣어주세요.');
+            });
+        }
+    </script>
+</body>
+</html>
+
